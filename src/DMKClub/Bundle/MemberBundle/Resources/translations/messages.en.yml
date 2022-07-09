@@ -37,6 +37,7 @@ dmkclub:
         status.label: Status
         status.proposal: Proposal
         status.active: Active
+        status.suspended:  Suspended
         status.terminated: Terminated
         
         form.choose_status: Choose a member status

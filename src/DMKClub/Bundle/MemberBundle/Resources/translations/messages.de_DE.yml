@@ -36,6 +36,7 @@ dmkclub:
         status.label:               Status
         status.proposal:            Antragsteller
         status.active:              Laufende Mitgliedschaft
+        status.suspended:           Ruhende Mitgliedschaft
         status.terminated:          Beendete Mitgliedschaft
 
         links:

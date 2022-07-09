@@ -1,67 +1,73 @@
 <?php
-
 namespace DMKClub\Bundle\MemberBundle\Provider;
 
 use Symfony\Contracts\Translation\TranslatorInterface;
-
 use DMKClub\Bundle\MemberBundle\Model\MemberStatus;
 
 class MemberStatusProvider
 {
-	/**
-	 * @var TranslatorInterface
-	 */
-	protected $translator;
 
-	/**
-	 * @var array
-	 */
-	protected $choices = array(
-		MemberStatus::PROPOSAL   => 'dmkclub.member.status.proposal',
-		MemberStatus::ACTIVE   => 'dmkclub.member.status.active',
-		MemberStatus::TERMINATED   => 'dmkclub.member.status.terminated',
-	);
+    /**
+     *
+     * @var TranslatorInterface
+     */
+    protected $translator;
 
-	/**
-	 * @var array
-	 */
-	protected $translatedChoices;
+    /**
+     *
+     * @var array
+     */
+    protected $choices = [
+        MemberStatus::PROPOSAL => 'dmkclub.member.status.proposal',
+        MemberStatus::ACTIVE => 'dmkclub.member.status.active',
+        MemberStatus::SUSPENDED => 'dmkclub.member.status.suspended',
+        MemberStatus::TERMINATED => 'dmkclub.member.status.terminated'
+    ];
 
-	/**
-	 * @param TranslatorInterface $translator
-	 */
-	public function __construct(TranslatorInterface $translator)
-	{
-		$this->translator = $translator;
-	}
+    /**
+     *
+     * @var array
+     */
+    protected $translatedChoices;
 
-	/**
-	 * @return array
-	 */
-	public function getChoices()
-	{
-		if (null === $this->translatedChoices) {
-			$this->translatedChoices = array();
-			foreach ($this->choices as $name => $label) {
-			    $this->translatedChoices[$this->translator->trans($label)] = $name;
-			}
-		}
+    /**
+     *
+     * @param TranslatorInterface $translator
+     */
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
 
-		return $this->translatedChoices;
-	}
+    /**
+     *
+     * @return array
+     */
+    public function getChoices()
+    {
+        if (null === $this->translatedChoices) {
+            $this->translatedChoices = [];
+            foreach ($this->choices as $name => $label) {
+                $this->translatedChoices[$this->translator->trans($label)] = $name;
+            }
+        }
 
-	/**
-	 * @param string $name
-	 * @return string
-	 * @throws \LogicException
-	 */
-	public function getLabelByName($name)
-	{
-		$choices = array_flip($this->getChoices());
-		if (!isset($choices[$name])) {
-			throw new \LogicException(sprintf('Unknown member status with name "%s"', $name));
-		}
+        return $this->translatedChoices;
+    }
 
-		return $choices[$name];
-	}
+    /**
+     *
+     * @param string $name
+     * @return string
+     * @throws \LogicException
+     */
+    public function getLabelByName($name)
+    {
+        $choices = array_flip($this->getChoices());
+        if (! isset($choices[$name])) {
+            throw new \LogicException(sprintf('Unknown member status with name "%s"', $name));
+        }
+
+        return $choices[$name];
+    }
 }
