@@ -1,0 +1,5 @@
+acl_categories:
+    dmkclub_data:
+        label: dmkclub.basics.privilege.category.dmkclub_data.label
+        tab: true
+        priority: 7

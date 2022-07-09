@@ -1,7 +1,6 @@
 parameters:
     dmkclub_basics.twigtemplate.entity.class:    DMKClub\Bundle\BasicsBundle\Entity\TwigTemplate
 #    dmkclub_basics.twigtemplate.manager.class:   DMKClub\Bundle\BasicsBundle\Entity\Manager\TwigTemplateManager
-    dmkclub_basics.provider.privilege_category_provider.class: DMKClub\Bundle\BasicsBundle\Provider\PrivilegeCategoryProvider
     dmkclub_basics.utility.datagrids.class:      DMKClub\Bundle\BasicsBundle\Utility\Datagrids
 
 services:
@@ -20,11 +19,6 @@ services:
             - "@oro_importexport.file.file_manager"
             - '@oro_importexport.file_manager'
             - "@logger"
-
-    dmkclub_basics.provider.privilege_category_provider:
-        class: "%dmkclub_basics.provider.privilege_category_provider.class%"
-        tags:
-            - { name: oro_user.privilege_category}
 
     dmkclub_basics.utility.datagrids:
         class: "%dmkclub_basics.utility.datagrids.class%"
