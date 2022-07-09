@@ -18,3 +18,10 @@ oro_entity:
                     join:
                         left:
                             - { join: 'OroContactBundle:ContactEmail', alias: e, conditionType: 'WITH', condition: 'e.owner = entity.contact and e.primary = true' }
+
+        DMKClub\Bundle\MemberBundle\Entity\MemberFeeDiscount:
+            end_date_is_null:
+                query:
+                    select:
+                        expr: (CASE WHEN entity.endDate IS NULL THEN true ELSE false END)  
+                        return_type: boolean

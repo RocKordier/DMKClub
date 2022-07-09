@@ -228,6 +228,7 @@ dmkclub:
             entity_description:  Represent a discount of membership fee
             id.label:            Id
             end_date.label:      Enddatum
+            end_date_is_null.label: Kein Enddatum
             member.label:        Mitglied
             reason.label:        Grund
             start_date.label:    Startdatum
