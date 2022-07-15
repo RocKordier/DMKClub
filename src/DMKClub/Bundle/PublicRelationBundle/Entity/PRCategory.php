@@ -9,6 +9,7 @@ use Oro\Bundle\UserBundle\Entity\User;
 use Oro\Bundle\EntityConfigBundle\Metadata\Annotation\Config;
 use Oro\Bundle\EntityConfigBundle\Metadata\Annotation\ConfigField;
 
+use DMKClub\Bundle\BasicsBundle\Model\LifecycleTrait;
 use DMKClub\Bundle\PublicRelationBundle\Model\ExtendPRCategory;
 
 /**
@@ -49,7 +50,10 @@ use DMKClub\Bundle\PublicRelationBundle\Model\ExtendPRCategory;
  * )
  * Die Angaben in "form" dienen dem create_select_form_inline
  */
-class PRCategory extends ExtendPRCategory {
+class PRCategory extends ExtendPRCategory
+{
+    use LifecycleTrait;
+
 	/*
 	 * Fields have to be duplicated here to enable dataaudit and soap transformation only for contact
 	*/
@@ -87,35 +91,6 @@ class PRCategory extends ExtendPRCategory {
 	 * )
 	 */
 	protected $name;
-
-
-	/**
-	 * @var \DateTime $createdAt
-	 *
-	 * @ORM\Column(type="datetime", name="created_at")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "entity"={
-	 *              "label"="oro.ui.created_at"
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $createdAt;
-
-	/**
-	 * @var \DateTime $updatedAt
-	 *
-	 * @ORM\Column(type="datetime", name="updated_at")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "entity"={
-	 *              "label"="oro.ui.updated_at"
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $updatedAt;
 
 	/**
 	 * @var User
@@ -186,57 +161,6 @@ class PRCategory extends ExtendPRCategory {
 	public function getName()
 	{
 		return $this->name;
-	}
-
-	/**
-	 * @return \DateTime
-	 */
-	public function getCreatedAt()
-	{
-		return $this->createdAt;
-	}
-
-	/**
-	 * @param \DateTime $createdAt
-	 */
-	public function setCreatedAt(\DateTime $createdAt)
-	{
-		$this->createdAt = $createdAt;
-	}
-
-	/**
-	 * @return \DateTime
-	 */
-	public function getUpdatedAt()
-	{
-		return $this->updatedAt;
-	}
-
-	/**
-	 * @param \DateTime $updatedAt
-	 */
-	public function setUpdatedAt(\DateTime $updatedAt)
-	{
-		$this->updatedAt = $updatedAt;
-	}
-	/**
-	 * Pre persist event listener
-	 *
-	 * @ORM\PrePersist
-	 */
-	public function prePersist()
-	{
-		$this->createdAt = $this->updatedAt = new \DateTime('now', new \DateTimeZone('UTC'));
-	}
-
-	/**
-	 * Pre update event handler
-	 *
-	 * @ORM\PreUpdate
-	 */
-	public function preUpdate()
-	{
-		$this->updatedAt = new \DateTime('now', new \DateTimeZone('UTC'));
 	}
 
 	/**
