@@ -239,8 +239,6 @@ services:
     DMKClub\Bundle\MemberBundle\Form\Handler\MemberBillingHandler:
         public: true
         arguments:
-            - "@dmkclub_member.memberbilling.form"
-            - "@request_stack"
             - "@doctrine.orm.entity_manager"
             - '@DMKClub\Bundle\MemberBundle\Entity\Manager\MemberBillingManager'
         tags:

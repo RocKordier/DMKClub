@@ -3,16 +3,16 @@ namespace DMKClub\Bundle\MemberBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Oro\Bundle\FormBundle\Model\UpdateHandlerFacade;
 use Oro\Bundle\SecurityBundle\Annotation\Acl;
 use Oro\Bundle\SecurityBundle\Annotation\AclAncestor;
-use DMKClub\Bundle\MemberBundle\Entity\MemberBilling;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use DMKClub\Bundle\MemberBundle\Entity\Manager\MemberBillingManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use DMKClub\Bundle\MemberBundle\Form\Handler\CreateBillsHandler;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Form\Form;
-use Oro\Bundle\FormBundle\Model\UpdateHandler;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use DMKClub\Bundle\MemberBundle\Entity\Manager\MemberBillingManager;
+use DMKClub\Bundle\MemberBundle\Entity\MemberBilling;
+use DMKClub\Bundle\MemberBundle\Form\Handler\CreateBillsHandler;
 use DMKClub\Bundle\MemberBundle\Form\Handler\MemberBillingHandler;
 
 /**
@@ -32,7 +32,7 @@ class MemberBillingController extends AbstractController
             CreateBillsHandler::class,
             'dmkclub_member.createbills.form' => Form::class,
             'dmkclub_member.memberbilling.form' => Form::class,
-            UpdateHandler::class,
+            UpdateHandlerFacade::class,
         ]);
     }
 
@@ -92,30 +92,13 @@ class MemberBillingController extends AbstractController
      */
     protected function update(MemberBilling $entity)
     {
-        /* @var $handler  \Oro\Bundle\FormBundle\Model\UpdateHandler */
-        $handler = $this->get(UpdateHandler::class);
-        return $handler->handleUpdate(
+        /* @var $handler  \Oro\Bundle\FormBundle\Model\UpdateHandlerFacade */
+        $handler = $this->get(UpdateHandlerFacade::class);
+        return $handler->update(
             $entity,
             $this->get('dmkclub_member.memberbilling.form'),
-            // SaveAndStayRoute
-            function (MemberBilling $entity) {
-                return [
-                    'route' => 'dmkclub_memberbilling_update',
-                    'parameters' => [
-                        'id' => $entity->getId()
-                    ]
-                ];
-            },
-            // SaveAndCloseRoute
-            function (MemberBilling $entity) {
-                return [
-                    'route' => 'dmkclub_memberbilling_view',
-                    'parameters' => [
-                        'id' => $entity->getId()
-                    ]
-                ];
-            },
             $this->get(TranslatorInterface::class)->trans('dmkclub.member.memberbilling.message.saved'),
+            null,
             $this->get(MemberBillingHandler::class)
         );
     }

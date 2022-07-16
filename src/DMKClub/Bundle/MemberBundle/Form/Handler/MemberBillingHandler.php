@@ -2,21 +2,17 @@
 namespace DMKClub\Bundle\MemberBundle\Form\Handler;
 
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Doctrine\Persistence\ObjectManager;
-use Oro\Bundle\TagBundle\Entity\TagManager;
 use Oro\Bundle\ChannelBundle\Provider\RequestChannelProvider;
+use Oro\Bundle\FormBundle\Form\Handler\FormHandlerInterface;
+use Oro\Bundle\TagBundle\Entity\TagManager;
 use DMKClub\Bundle\MemberBundle\Entity\MemberBilling;
 use DMKClub\Bundle\MemberBundle\Entity\Manager\MemberBillingManager;
 
-class MemberBillingHandler
+class MemberBillingHandler implements FormHandlerInterface
 {
-
-    /** @var FormInterface */
-    protected $form;
-
-    /** @var RequestStack */
-    protected $request;
 
     /** @var ObjectManager */
     protected $manager;
@@ -31,10 +27,8 @@ class MemberBillingHandler
      * @param ObjectManager $manager
      * @param RequestChannelProvider $requestChannelProvider
      */
-    public function __construct(FormInterface $form, RequestStack $request, ObjectManager $manager, MemberBillingManager $memberBillingManager)
+    public function __construct(ObjectManager $manager, MemberBillingManager $memberBillingManager)
     {
-        $this->form = $form;
-        $this->request = $request;
         $this->manager = $manager;
         $this->memberBillingManager = $memberBillingManager;
     }
@@ -46,20 +40,19 @@ class MemberBillingHandler
      *
      * @return bool True on successful processing, false otherwise
      */
-    public function process(MemberBilling $entity)
+    public function process($entity, FormInterface $form, Request $request)
     {
         $this->restoreProcessorSettings($entity);
 
-        $this->form->setData($entity);
+        $form->setData($entity);
 
-        $request = $this->request->getCurrentRequest();
         if (in_array($request->getMethod(), [
             'POST',
             'PUT'
         ])) {
-            $this->form->handleRequest($request);
+            $form->handleRequest($request);
 
-            if ($this->form->isValid()) {
+            if ($form->isValid()) {
                 $this->onSuccess($entity);
 
                 return true;

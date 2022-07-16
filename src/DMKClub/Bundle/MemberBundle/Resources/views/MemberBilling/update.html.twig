@@ -26,9 +26,15 @@
 	    {{ UI.cancelButton(path('dmkclub_memberbilling_index')) }}
     {% endif %}
 
-    {% set html = UI.saveAndCloseButton() %}
+    {% set html = UI.saveAndCloseButton({
+        'route': 'dmkclub_memberbilling_view',
+        'params': {'id': '$id'}
+    }) %}
     {% if form.vars.value.id or is_granted('dmkclub_memberbilling_update') %}
-        {% set html = html ~ UI.saveAndStayButton() %}
+        {% set html = html ~ UI.saveAndStayButton({
+            'route': 'dmkclub_memberbilling_update',
+            'params': {'id': '$id'}
+        }) %}
     {% endif %}
     {{ UI.dropdownSaveButton({'html': html}) }}
 {% endblock %}
