@@ -355,11 +355,7 @@ class MemberBillingManager implements ContainerAwareInterface
         if ($processorName) {
             $storedData = isset($data[$processorName]) ? $data[$processorName] : [];
             $processor = $this->getProcessor($entity);
-            // Bereinigung von veralteten Attributen
-            foreach ($processor->getFields() as $fieldName) {
-                if (array_key_exists($fieldName, $storedData))
-                    $result[$fieldName] = $storedData[$fieldName];
-            }
+            $result = $processor->prepareFormData($storedData);
         }
         return $result;
     }

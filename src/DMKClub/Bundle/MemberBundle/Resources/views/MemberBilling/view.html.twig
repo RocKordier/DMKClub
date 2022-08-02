@@ -100,8 +100,8 @@
     {% set settingsWidget %}
         <div class="responsive-cell">
         {% for key, value in options %}
-        {% set label = 'dmkclub.member.memberbilling.'~ key ~ '.label' %}
-       {{ UI.renderProperty(label|trans, value) }}
+          {% set label = 'dmkclub.member.memberbilling.'~ key ~ '.label' %}
+          {{ UI.renderHtmlProperty(label|trans, value is iterable ? value|join('<br/>') | raw : value|escape ) }}
         {% endfor %}
         </div>
     {% endset %}

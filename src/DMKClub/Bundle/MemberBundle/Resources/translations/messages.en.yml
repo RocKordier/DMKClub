@@ -136,8 +136,6 @@ dmkclub:
             entity_plural_label:       Membership Billings
             entity_description:        Represent membership billing definition
             id.label:                  Id
-            age_child.label:           Max Age for child fee
-            age_child.tooltip:         This is the age when a member has to pay the full fee
             block.processor_settings:  Settings
             data_channel.label:        Data channel
             end_date.label:            End date
@@ -145,9 +143,14 @@ dmkclub:
             export_filesystem.tooltip: Target for PDF files on mass export of bills
             fee.label:                 Membership Fee
             fee_admission.label:       Fee admission for new Members
-            fee_child.label:           Fee reduced for childs
             fee_discount.label:        Discount Fee
             fee_total.label:           Fee total
+            fee_ages.label:            Fee group by age
+            fee_ages.tooltip:          Start and end age for given fee amount.
+            fee_ages.add:              Add fee group
+            fee_age.from:              Age from
+            fee_age.to:                Age to
+            fee_age.value:             Fee amount
             member_fees.label:         Member fees
             name.label:                Name
             sign.label:                Short sign

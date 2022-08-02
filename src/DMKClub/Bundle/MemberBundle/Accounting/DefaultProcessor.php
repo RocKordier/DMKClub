@@ -1,10 +1,13 @@
 <?php
 namespace DMKClub\Bundle\MemberBundle\Accounting;
 
-use DMKClub\Bundle\MemberBundle\Form\Type\DefaultProcessorSettingsType;
+use DateTime;
+use DMKClub\Bundle\MemberBundle\Accounting\Time\TimeCalculator;
 use DMKClub\Bundle\MemberBundle\Entity\Member;
 use DMKClub\Bundle\MemberBundle\Entity\MemberFeePosition;
-use DMKClub\Bundle\MemberBundle\Accounting\Time\TimeCalculator;
+use DMKClub\Bundle\MemberBundle\Form\Type\DefaultProcessorSettingsType;
+use DMKClub\Bundle\MemberBundle\Model\AgePrice;
+
 use Psr\Log\LoggerInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -18,8 +21,17 @@ class DefaultProcessor extends AbstractProcessor
     const OPTION_FEE = 'fee';
     const OPTION_FEE_ADMISSION = 'fee_admission';
     const OPTION_FEE_DISCOUNT = 'fee_discount';
+
+    /** @deprecated */
     const OPTION_FEE_CHILD = 'fee_child';
+    /** @deprecated */
     const OPTION_AGE_CHILD = 'age_child';
+
+    const OPTION_FEE_AGES = 'fee_ages';
+    const OPTION_FEE_AGE_FROM = 'fee_age_from';
+    const OPTION_FEE_AGE_TO = 'fee_age_to';
+    const OPTION_FEE_AGE_LABEL = 'fee_age_label';
+    const OPTION_FEE_AGE_VALUE = 'fee_age_value';
 
     /**
      *
@@ -47,8 +59,7 @@ class DefaultProcessor extends AbstractProcessor
             self::OPTION_FEE,
             self::OPTION_FEE_DISCOUNT,
             self::OPTION_FEE_ADMISSION,
-            self::OPTION_FEE_CHILD,
-            self::OPTION_AGE_CHILD
+            self::OPTION_FEE_AGES,
         ];
     }
 
@@ -90,8 +101,11 @@ class DefaultProcessor extends AbstractProcessor
         $feeFull = (int) $this->getOption(self::OPTION_FEE);
         $feeDiscount = (int) $this->getOption(self::OPTION_FEE_DISCOUNT);
         $feeAdmission = (int) $this->getOption(self::OPTION_FEE_ADMISSION);
+
+        // FIXME
         $feeChild = (int) $this->getOption(self::OPTION_FEE_CHILD);
         $ageChild = (int) $this->getOption(self::OPTION_AGE_CHILD);
+        $agePrices = $this->getAgePrices();
 
         $fee = 0;
         // Über jeden Monat iterieren, den erste und den letzten Monat merken
@@ -110,9 +124,13 @@ class DefaultProcessor extends AbstractProcessor
                 }
                 $lastMonth2Pay = clone $currentMonthFirstDay;
                 $periodFee = $feeFull;
-                if ($this->isMembershipChild($member, $currentMonthFirstDay, $ageChild)) {
-                    $periodFee = $feeChild;
-                } elseif ($this->isMembershipDiscount($member, $currentMonthFirstDay)) {
+                $agePrice = $this->lookupAgePrice($member, $currentMonthFirstDay, $agePrices);
+                $hasDiscount = $this->isMembershipDiscount($member, $currentMonthFirstDay);
+
+                if ($agePrice && (!$hasDiscount || $agePrice->getFeeAgeValue() < $feeDiscount )) {
+                    $periodFee = $agePrice->getFeeAgeValue();
+                }
+                elseif ($hasDiscount) {
                     $periodFee = $feeDiscount;
                 }
                 $fee += $periodFee;
@@ -164,37 +182,55 @@ class DefaultProcessor extends AbstractProcessor
         return $memberFee;
     }
 
+    /**
+     *
+     * @return AgePrice[]
+     */
+    private function getAgePrices(): array
+    {
+        $agePrices = [];
+        $pricesData = (array) $this->getOption(self::OPTION_FEE_AGES);
+        foreach ($pricesData as $priceData) {
+            $agePrices[] = $priceData instanceof AgePrice ? $priceData : new AgePrice($priceData);
+        }
+        return $agePrices;
+    }
+
     private function isNewMembership($member, $startDate, $endDate)
     {
         return $member->getStartDate() >= $startDate && $member->getStartDate() <= $endDate;
     }
 
-    private function writeLog($message)
-    {
-        $this->logger->info($message);
-    }
-
     /**
-     * Is member not full aged in current month
      *
      * @param Member $member
-     * @param \DateTime $currentMonth
+     * @param DateTime $currentMonth
+     * @param AgePrice[] $agePrices
+     * @return AgePrice|null
      */
-    protected function isMembershipChild($member, $currentMonth, $ageChild)
+    private function lookupAgePrice(Member $member, DateTime $currentMonth, array $agePrices): ?AgePrice
     {
+        if (empty($agePrices)) {
+            return null;
+        }
         // currentMonth steht immer auf dem 1. des Monats. Wer in dem
         // Monat 18 wird, ist also am 1. noch 17 Jahre alt.
         // Der volle Beitrag gilt erst im Folgemonat
         if (! $member->getContact()) {
-            return false;
+            return null;
         }
         $birthday = $member->getContact()->getBirthday();
         if (! $birthday) {
-            return false;
+            return null;
         }
         $age = $birthday->diff($currentMonth)->y;
-        // print_r([$currentMonth->format('Y-m-d') => ($age < $ageChild), 'age' => $age ]);
-        return $age < $ageChild;
+
+        foreach ($agePrices as $agePrice) {
+            if ($age >= $agePrice->getFeeAgeFrom() && $age <= $agePrice->getFeeAgeTo()) {
+                return $agePrice;
+            }
+        }
+        return null;
     }
 
     /**
@@ -230,9 +266,71 @@ class DefaultProcessor extends AbstractProcessor
         foreach ($options as $key => $value) {
             if ($key == self::OPTION_FEE || $key == self::OPTION_FEE_CHILD || $key == self::OPTION_FEE_DISCOUNT || $key == self::OPTION_FEE_ADMISSION) {
                 $value = number_format($value / 100, 2);
+            } elseif ($key === self::OPTION_FEE_AGES) {
+                $data = [];
+                foreach ($value as $agePrice) {
+                    /* @var $agePrice AgePrice */
+                    $price = number_format($agePrice->getFeeAgeValue() / 100, 2);
+                    $data[] = sprintf('%02d - %02d: %s', $agePrice->getFeeAgeFrom(), $agePrice->getFeeAgeTo(), $price);
+                }
+                $value = $data;
             }
             $ret[$key] = $value;
         }
         return $ret;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \DMKClub\Bundle\MemberBundle\Accounting\ProcessorInterface::prepareFormData()
+     */
+    public function prepareFormData(array $storedData): array
+    {
+        $result = parent::prepareFormData($storedData);
+        if (!empty($result[self::OPTION_FEE_AGES])) {
+            $agePrices = [];
+            foreach ($result[self::OPTION_FEE_AGES] as $agePriceData) {
+                $agePrice = new AgePrice();
+                $agePrice->setFeeAgeFrom($agePriceData[self::OPTION_FEE_AGE_FROM]);
+                $agePrice->setFeeAgeTo($agePriceData[self::OPTION_FEE_AGE_TO]);
+                $agePrice->setFeeAgeValue($agePriceData[self::OPTION_FEE_AGE_VALUE]);
+                $agePrices[] = $agePrice;
+            }
+            $result[self::OPTION_FEE_AGES] = $agePrices;
+        }
+
+        // Altdaten konvertieren
+        if (array_key_exists(self::OPTION_FEE_CHILD, $storedData)) {
+            $agePrice = new AgePrice();
+            $agePrice->setFeeAgeValue(array_key_exists(self::OPTION_FEE_CHILD, $storedData) ? $storedData[self::OPTION_FEE_CHILD] : 0);
+            $agePrice->setFeeAgeFrom(0);
+            $agePrice->setFeeAgeTo(array_key_exists(self::OPTION_AGE_CHILD, $storedData) ? $storedData[self::OPTION_AGE_CHILD] - 1 : 13);
+            $result[self::OPTION_FEE_AGES][] = $agePrice;
+        }
+
+        return $result;
+    }
+    public function prepareStoredData(array $formData): array
+    {
+        $ageGroups = [];
+        $ageGroupsForm = $formData[self::OPTION_FEE_AGES];
+        foreach ($ageGroupsForm as $ageGroupForm) {
+            /* @var $ageGroupForm AgePrice */
+            if (!$ageGroupForm->isEmpty()) {
+                $ageGroups[] = [
+                    self::OPTION_FEE_AGE_FROM => (int) $ageGroupForm->getFeeAgeFrom(),
+                    self::OPTION_FEE_AGE_TO => (int) $ageGroupForm->getFeeAgeTo(),
+                    self::OPTION_FEE_AGE_VALUE => (int) $ageGroupForm->getFeeAgeValue(),
+                ];
+            }
+        }
+        $formData[self::OPTION_FEE_AGES] = $ageGroups;
+        return $formData;
+    }
+
+    private function writeLog($message)
+    {
+        $this->logger->info($message);
     }
 }

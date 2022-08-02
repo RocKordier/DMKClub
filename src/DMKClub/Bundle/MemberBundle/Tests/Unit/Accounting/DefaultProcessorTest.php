@@ -64,10 +64,28 @@ class DefaultProcessorTest extends TestCase
         $year = 2016;
         $feeOptions = [
             DefaultProcessor::OPTION_FEE => 1000,
-            DefaultProcessor::OPTION_FEE_DISCOUNT => 800,
+            DefaultProcessor::OPTION_FEE_DISCOUNT => 600,
             DefaultProcessor::OPTION_FEE_ADMISSION => 350,
-            DefaultProcessor::OPTION_FEE_CHILD => 200,
-            DefaultProcessor::OPTION_AGE_CHILD => 18
+            DefaultProcessor::OPTION_FEE_AGES => [
+                [
+                    DefaultProcessor::OPTION_FEE_AGE_FROM => 0,
+                    DefaultProcessor::OPTION_FEE_AGE_TO => 5,
+                    DefaultProcessor::OPTION_FEE_AGE_VALUE => 0,
+                ],
+                // Hier wird es teuer, damit die Ermäßigung getestet werden kann
+                [
+                    DefaultProcessor::OPTION_FEE_AGE_FROM => 6,
+                    DefaultProcessor::OPTION_FEE_AGE_TO => 7,
+                    DefaultProcessor::OPTION_FEE_AGE_VALUE => 800,
+                ],
+                [
+                    DefaultProcessor::OPTION_FEE_AGE_FROM => 8,
+                    DefaultProcessor::OPTION_FEE_AGE_TO => 17,
+                    DefaultProcessor::OPTION_FEE_AGE_VALUE => 200,
+                ],
+            ],
+//             DefaultProcessor::OPTION_FEE_CHILD => 200,
+//             DefaultProcessor::OPTION_AGE_CHILD => 18
         ];
 
         return [
@@ -104,6 +122,28 @@ class DefaultProcessorTest extends TestCase
                 1,
                 'retiredfull'
             ],
+            // Kinderbeitrag 0 über gesamte Laufzeit
+            [
+                new \DateTime('2016-07-01'),
+                new \DateTime('2017-06-30'),
+                $feeOptions,
+                $this->buildMember('2010-12-01', NULL, ($year - 4) . '-04-20'),
+                0,
+                0,
+                1,
+                'simplechild-zero'
+            ],
+            // Eintritt Kind 0 mit Aufnahme
+            [
+                new \DateTime('2016-07-01'),
+                new \DateTime('2017-06-30'),
+                $feeOptions,
+                $this->buildMember('2016-12-01', NULL, ($year - 4) . '-04-20'),
+                0,
+                350,
+                2,
+                'entrychild-zero'
+            ],
             // Kinderbeitrag über gesamte Laufzeit
             [
                 new \DateTime('2016-07-01'),
@@ -115,6 +155,45 @@ class DefaultProcessorTest extends TestCase
                 1,
                 'simplechild'
             ],
+            // Kinderbeitrag über gesamte Laufzeit mit zusätzlich 3 Monate Ermäßigung
+            [
+                new \DateTime('2016-07-01'),
+                new \DateTime('2017-06-30'),
+                $feeOptions,
+                $this->buildMember('2010-02-01', NULL, ($year - 10) . '-05-13', [
+                    $this->buildMemberFeeDiscount('2017-02-01', '2017-04-30')
+                ]),
+                2400,
+                2400,
+                1,
+                'simplechild-with-ignored-discount'
+            ],
+
+            // Hoher Kinderbeitrag ohne Ermäßigung
+            [
+                new \DateTime('2016-07-01'),
+                new \DateTime('2017-06-30'),
+                $feeOptions,
+                $this->buildMember('2010-02-01', NULL, ($year - 6) . '-05-13'),
+                9600,
+                9600,
+                1,
+                'expensivechild'
+            ],
+            // Hoher Kinderbeitrag mit Ermäßigung
+            [
+                new \DateTime('2016-07-01'),
+                new \DateTime('2017-06-30'),
+                $feeOptions,
+                $this->buildMember('2010-02-01', NULL, ($year - 6) . '-05-13', [
+                    $this->buildMemberFeeDiscount('2017-02-01', '2017-06-30')
+                ]),
+                8600,
+                8600,
+                1,
+                'expensivechild-with-discount'
+            ],
+
             // Kinderbeitrag die ersten 11 Monate. Ab 18 voller Preis (Geburtstag im Mai, voller Beitrag ab Juni)
             [
                 new \DateTime('2016-07-01'),
@@ -157,8 +236,8 @@ class DefaultProcessorTest extends TestCase
                 $this->buildMember('2015-07-01', NULL, '1970-05-13', [
                     $this->buildMemberFeeDiscount('2015-07-01', NULL)
                 ]),
-                9600,
-                9600,
+                7200,
+                7200,
                 1,
                 'discountsimple'
             ],
@@ -170,8 +249,8 @@ class DefaultProcessorTest extends TestCase
                 $this->buildMember('2016-08-01', NULL, '1970-05-13', [
                     $this->buildMemberFeeDiscount('2015-07-01', NULL)
                 ]),
-                8800,
-                9150,
+                6600,
+                6950,
                 2,
                 'newdiscount'
             ],
@@ -183,8 +262,8 @@ class DefaultProcessorTest extends TestCase
                 $this->buildMember('2015-08-01', NULL, '1970-05-13', [
                     $this->buildMemberFeeDiscount('2015-07-01', '2016-12-31')
                 ]),
-                10800,
-                10800,
+                9600,
+                9600,
                 1,
                 'discount2full'
             ],
@@ -198,8 +277,8 @@ class DefaultProcessorTest extends TestCase
                     $this->buildMemberFeeDiscount('2015-07-01', '2016-12-31'),
                     $this->buildMemberFeeDiscount('2017-05-01', NULL)
                 ]),
-                10400,
-                10400,
+                8800,
+                8800,
                 1,
                 'discount2full2discount'
             ],
@@ -212,8 +291,8 @@ class DefaultProcessorTest extends TestCase
                 $this->buildMember('2015-08-01', NULL, '1970-05-13', [
                     $this->buildMemberFeeDiscount('2017-05-01', NULL)
                 ]),
-                11600,
-                11600,
+                11200,
+                11200,
                 1,
                 'full2discount'
             ],
@@ -226,8 +305,8 @@ class DefaultProcessorTest extends TestCase
                 $this->buildMember('2015-08-01', NULL, '1970-05-13', [
                     $this->buildMemberFeeDiscount('2017-02-01', NULL)
                 ]),
-                2600,
-                2600,
+                2200,
+                2200,
                 1,
                 'full2discount'
             ]

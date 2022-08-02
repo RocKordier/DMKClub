@@ -82,8 +82,8 @@ class MemberBillingHandler implements FormHandlerInterface
         $configData = $entity->getProcessorConfig();
         $configData = $configData ? unserialize($configData) : [];
         // Die Daten für den aktuellen Prozessor neu schreiben
-        $configData[$entity->getProcessor()] = $entity->getProcessorSettings();
-
+        $processor = $this->memberBillingManager->getProcessor($entity);
+        $configData[$entity->getProcessor()] = $processor->prepareStoredData($entity->getProcessorSettings());
         $entity->setProcessorConfig(serialize($configData));
     }
 

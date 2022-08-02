@@ -40,7 +40,7 @@ abstract class AbstractProcessor implements ProcessorInterface
 
     protected function getOption($key)
     {
-        return $this->options[$key];
+        return array_key_exists($key, $this->options) ? $this->options[$key] : null;
     }
 
     public function formatSettings(array $options)
@@ -98,5 +98,27 @@ abstract class AbstractProcessor implements ProcessorInterface
             sprintf('%s-%s', $memberBilling->getSign(), $member->getMemberCode())
         );
         return $memberFee;
+    }
+
+    /**
+     *
+     * {@inheritDoc}
+     * @see \DMKClub\Bundle\MemberBundle\Accounting\ProcessorInterface::prepareFormData()
+     */
+    public function prepareFormData(array $storedData): array
+    {
+        $result = [];
+        // Bereinigung von veralteten Attributen
+        foreach ($this->getFields() as $fieldName) {
+            if (array_key_exists($fieldName, $storedData)) {
+                $result[$fieldName] = $storedData[$fieldName];
+            }
+        }
+        return $result;
+    }
+
+    public function prepareStoredData(array $formData): array
+    {
+        return $formData;
     }
 }

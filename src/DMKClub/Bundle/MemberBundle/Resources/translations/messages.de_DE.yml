@@ -128,8 +128,6 @@ dmkclub:
             entity_plural_label: Abrechnung Mitgliedsbeiträge
             entity_description:  Represent membership billing definition
             id.label:            Id
-            age_child.label:      Altersgrenze für Kinderbeitrag
-            age_child.tooltip:    Das Alter, ab dem das Mitglied den vollen Beitrag bezahlen muss.
             block.processor_settings: Einstellungen
             data_channel.label:   Kanal
             fee_total.label:      Gesamtsumme
@@ -140,7 +138,12 @@ dmkclub:
             fee.label:            Mitgliedsbeitrag
             fee_discount.label:   Mitgliedsbeitrag reduziert
             fee_admission.label:  Aufnahmegebühr für neue Mitglieder
-            fee_child.label:      Beitrag für Kinder
+            fee_ages.label:       Alters-Staffelung
+            fee_ages.tooltip:     Der Beitrag je Staffel gilt beginnend ab dem Startalter bis einschließlich des angegebenen Endalters des Mitglieds.
+            fee_ages.add:         Alters-Staffelung hinzufügen
+            fee_age.from:         Alter von
+            fee_age.to:           Alter bis
+            fee_age.value:        Beitrag
             member_fees.label:    Mitgliedsbeiträge
             name.label:           Name
             sign.label:           Zeichen

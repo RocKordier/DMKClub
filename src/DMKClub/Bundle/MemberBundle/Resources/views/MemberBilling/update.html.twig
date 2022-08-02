@@ -64,7 +64,18 @@
 
     {% set processorFormData = [form_row(form.processor)] %}
     {% if form.processorSettings is defined %}
-        {% set processorFormData = processorFormData|merge([form_widget(form.processorSettings)]) %}
+        {% set formFieldsProc = [] %}
+        {% for child in form.processorSettings.children %}
+            {% if child.vars.name == 'fee_ages' %}
+                {% set processorFormData = processorFormData|merge([
+                    form_row_collection(child)
+                ]) %}
+            {% else %}
+                {% set processorFormData = processorFormData|merge([
+                    form_row(child)
+                ]) %}
+            {% endif %}
+        {% endfor %}
     {% endif %}
 
     {% set formFields1 = [] %}
