@@ -42,16 +42,16 @@ datagrids:
                 data_name:     priceTotal
             payedTotal:
                 label:         dmkclub.member.memberfee.payed_total.label
-#                frontend_type: currency
-#                divisor:       100
-                type:          callback
-                callable:      "@dmkclub_basics.utility.datagrids->cent2float"
+                frontend_type: currency
+                divisor:       100
+#                type:          callback
+#                callable:      "@dmkclub_basics.utility.datagrids->cent2float"
                 data_name:     payedTotal
-                inline_editing:
-                    enable:    true
-                    editor:
+#                inline_editing:
+#                    enable:    true
+#                    editor:
 #                        view:  oroform/js/app/views/editor/number-editor-view
-                        view:  dmkclubbasics/js/app/views/editor/cent-editor-view
+#                        view:  dmkclubbasics/js/app/views/editor/cent-editor-view
             billDate:
                 label:         dmkclub.member.memberfee.bill_date.label
                 frontend_type: date
