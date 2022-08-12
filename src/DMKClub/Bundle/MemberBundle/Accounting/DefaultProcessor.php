@@ -30,8 +30,9 @@ class DefaultProcessor extends AbstractProcessor
     const OPTION_FEE_AGES = 'fee_ages';
     const OPTION_FEE_AGE_FROM = 'fee_age_from';
     const OPTION_FEE_AGE_TO = 'fee_age_to';
-    const OPTION_FEE_AGE_LABEL = 'fee_age_label';
     const OPTION_FEE_AGE_VALUE = 'fee_age_value';
+    /* Höherer Beitrag im Monat des Geburtstags */
+    const OPTION_FEE_AGE_RAISE_ON_BIRTHDAY = 'fee_age_raise_on_birthday';
 
     /**
      *
@@ -41,11 +42,13 @@ class DefaultProcessor extends AbstractProcessor
 
     /** @var \Psr\Log\LoggerInterface */
     private $logger;
+    private $ageCalculator;
 
-    public function __construct(LoggerInterface $logger, EntityManagerInterface $em)
+    public function __construct(LoggerInterface $logger, EntityManagerInterface $em, AgeCalculator $ageCalculator)
     {
         $this->em = $em;
         $this->logger = $logger;
+        $this->ageCalculator = $ageCalculator;
     }
 
     /**
@@ -59,6 +62,7 @@ class DefaultProcessor extends AbstractProcessor
             self::OPTION_FEE,
             self::OPTION_FEE_DISCOUNT,
             self::OPTION_FEE_ADMISSION,
+            self::OPTION_FEE_AGE_RAISE_ON_BIRTHDAY,
             self::OPTION_FEE_AGES,
         ];
     }
@@ -101,10 +105,7 @@ class DefaultProcessor extends AbstractProcessor
         $feeFull = (int) $this->getOption(self::OPTION_FEE);
         $feeDiscount = (int) $this->getOption(self::OPTION_FEE_DISCOUNT);
         $feeAdmission = (int) $this->getOption(self::OPTION_FEE_ADMISSION);
-
-        // FIXME
-        $feeChild = (int) $this->getOption(self::OPTION_FEE_CHILD);
-        $ageChild = (int) $this->getOption(self::OPTION_AGE_CHILD);
+        $feeAgeRaiseOnBirthday = (bool) $this->getOption(self::OPTION_FEE_AGE_RAISE_ON_BIRTHDAY);
         $agePrices = $this->getAgePrices();
 
         $fee = 0;
@@ -124,7 +125,7 @@ class DefaultProcessor extends AbstractProcessor
                 }
                 $lastMonth2Pay = clone $currentMonthFirstDay;
                 $periodFee = $feeFull;
-                $agePrice = $this->lookupAgePrice($member, $currentMonthFirstDay, $agePrices);
+                $agePrice = $this->lookupAgePrice($member, $currentMonthFirstDay, $agePrices, $feeAgeRaiseOnBirthday);
                 $hasDiscount = $this->isMembershipDiscount($member, $currentMonthFirstDay);
 
                 if ($agePrice && (!$hasDiscount || $agePrice->getFeeAgeValue() < $feeDiscount )) {
@@ -206,9 +207,10 @@ class DefaultProcessor extends AbstractProcessor
      * @param Member $member
      * @param DateTime $currentMonth
      * @param AgePrice[] $agePrices
+     * @param bool $feeAgeRaiseOnBirthday
      * @return AgePrice|null
      */
-    private function lookupAgePrice(Member $member, DateTime $currentMonth, array $agePrices): ?AgePrice
+    private function lookupAgePrice(Member $member, DateTime $currentMonth, array $agePrices, $feeAgeRaiseOnBirthday): ?AgePrice
     {
         if (empty($agePrices)) {
             return null;
@@ -223,7 +225,7 @@ class DefaultProcessor extends AbstractProcessor
         if (! $birthday) {
             return null;
         }
-        $age = $birthday->diff($currentMonth)->y;
+        $age = $this->ageCalculator->getAgeInMonth($currentMonth, $birthday, $feeAgeRaiseOnBirthday);
 
         foreach ($agePrices as $agePrice) {
             if ($age >= $agePrice->getFeeAgeFrom() && $age <= $agePrice->getFeeAgeTo()) {
@@ -311,6 +313,7 @@ class DefaultProcessor extends AbstractProcessor
 
         return $result;
     }
+
     public function prepareStoredData(array $formData): array
     {
         $ageGroups = [];

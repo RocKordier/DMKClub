@@ -9,6 +9,7 @@ use Psr\Log\NullLogger;
 use DMKClub\Bundle\MemberBundle\Entity\MemberFeeDiscount;
 use DMKClub\Bundle\MemberBundle\Entity\MemberFeePosition;
 use PHPUnit\Framework\TestCase;
+use DMKClub\Bundle\MemberBundle\Accounting\AgeCalculator;
 
 class DefaultProcessorTest extends TestCase
 {
@@ -23,7 +24,7 @@ class DefaultProcessorTest extends TestCase
     public function testGetLabel()
     {
         $emMock = $this->getEMMockBuilder()->getMock();
-        $processor = new DefaultProcessor($this->logger, $emMock);
+        $processor = new DefaultProcessor($this->logger, $emMock, new AgeCalculator());
         $this->assertEquals('dmkclub.member.accounting.processor.default', $processor->getLabel(), 'Label is wrong');
     }
 
@@ -34,7 +35,7 @@ class DefaultProcessorTest extends TestCase
     public function testExecute($start, $end, $options, $member, $expectedFee, $expectedTotal, $positionCnt, $tag)
     {
         $emMock = $this->getEMMockBuilder()->getMock();
-        $processor = new DefaultProcessor($this->logger, $emMock);
+        $processor = new DefaultProcessor($this->logger, $emMock, new AgeCalculator());
         $memberBilling = new MemberBilling();
         $memberBilling->setStartDate($start);
         $memberBilling->setEndDate($end);
@@ -66,6 +67,7 @@ class DefaultProcessorTest extends TestCase
             DefaultProcessor::OPTION_FEE => 1000,
             DefaultProcessor::OPTION_FEE_DISCOUNT => 600,
             DefaultProcessor::OPTION_FEE_ADMISSION => 350,
+            DefaultProcessor::OPTION_FEE_AGE_RAISE_ON_BIRTHDAY => 0,
             DefaultProcessor::OPTION_FEE_AGES => [
                 [
                     DefaultProcessor::OPTION_FEE_AGE_FROM => 0,

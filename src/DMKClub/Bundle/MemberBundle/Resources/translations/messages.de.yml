@@ -140,6 +140,8 @@ dmkclub:
             fee_admission.label:  Aufnahmegebühr für neue Mitglieder
             fee_ages.label:       Alters-Staffelung
             fee_ages.tooltip:     Der Beitrag je Staffel gilt beginnend ab dem Startalter bis einschließlich des angegebenen Endalters des Mitglieds.
+            fee_age_raise_on_birthday.label: Beitragsanpassung zum Geburtstag
+            fee_age_raise_on_birthday.tooltip: Wenn aktiviert, wird ein höherer Beitrag im Monat des Geburtstags verwendet. Wenn die Option deaktiviert ist, dann gilt der neue Beitrag erst im Folgemonat.
             fee_ages.add:         Alters-Staffelung hinzufügen
             fee_age.from:         Alter von
             fee_age.to:           Alter bis

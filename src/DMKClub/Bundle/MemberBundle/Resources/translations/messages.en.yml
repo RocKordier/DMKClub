@@ -147,6 +147,8 @@ dmkclub:
             fee_total.label:           Fee total
             fee_ages.label:            Fee group by age
             fee_ages.tooltip:          Start and end age for given fee amount.
+            fee_age_raise_on_birthday.label: Fee update on birthday
+            fee_age_raise_on_birthday.tooltip: If activated the new fee will be used at month of birthday.
             fee_ages.add:              Add fee group
             fee_age.from:              Age from
             fee_age.to:                Age to

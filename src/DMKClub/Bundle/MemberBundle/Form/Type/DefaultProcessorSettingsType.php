@@ -7,6 +7,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use DMKClub\Bundle\MemberBundle\Accounting\DefaultProcessor;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 class DefaultProcessorSettingsType extends AbstractProcessorSettingsType
 {
@@ -34,6 +35,11 @@ class DefaultProcessorSettingsType extends AbstractProcessorSettingsType
             		'required' => false,
             		'divisor' => 100,
             		'label' => $labelPrefix.DefaultProcessor::OPTION_FEE_DISCOUNT.'.label'
+            ])
+            ->add(DefaultProcessor::OPTION_FEE_AGE_RAISE_ON_BIRTHDAY, CheckboxType::class, [
+                'required' => false,
+                'tooltip' => $labelPrefix.DefaultProcessor::OPTION_FEE_AGE_RAISE_ON_BIRTHDAY.'.tooltip',
+                'label' => $labelPrefix.DefaultProcessor::OPTION_FEE_AGE_RAISE_ON_BIRTHDAY.'.label'
             ])
         ;
         $builder
