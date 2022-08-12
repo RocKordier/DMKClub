@@ -37,6 +37,36 @@ class MemberManager implements ContainerAwareInterface
     }
 
     /**
+     * Update member status to terminated for all members with end date in past.
+     *
+     * @return number of newly resigned members
+     */
+    public function checkResignedMembers()
+    {
+        $now = new \DateTime();
+        $qb = $this->getMemberRepository()->createQueryBuilder('m');
+        $qb->where('m.endDate IS NOT NULL');
+        $qb->andWhere('m.endDate < :today');
+        $qb->andWhere('m.status != :status');
+
+        $qb->setParameter('today', $now->format('c'));
+        $qb->setParameter('status', 'terminated');
+        $q = $qb->getQuery();
+        $result = $q->iterate();
+        $cnt = 0;
+        foreach ($result as $row) {
+            /* @var $mbr \DMKClub\Bundle\MemberBundle\Entity\Member */
+            $mbr = $row[0];
+            $mbr->setStatus(MemberStatus::TERMINATED);
+            $this->em->persist($mbr);
+            $cnt++;
+        }
+        $this->em->flush();
+
+        return $cnt;
+    }
+
+    /**
      * The next possible memberCode
      *
      * @return number
