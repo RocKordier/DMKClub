@@ -1,0 +1,20 @@
+{% import 'OroUIBundle::macros.html.twig' as UI %}
+{% import 'OroTagBundle::macros.html.twig' as tag %}
+{% import 'OroEntityConfigBundle::macros.html.twig' as entityConfig %}
+
+<div class="widget-content">
+    <div class="row-fluid form-horizontal">
+        <div class="responsive-block">
+
+            {{ UI.renderProperty('dmkclub.sponsor.contract.begin_date.label'|trans, entity.beginDate ? entity.beginDate|oro_format_date : null) }}
+            {%- if entity.endDate -%}
+	            {{ UI.renderProperty('dmkclub.sponsor.contract.end_date.label'|trans, entity.endDate ? entity.endDate|oro_format_date : null) }}
+            {% endif %}
+            {{ UI.renderProperty('dmkclub.sponsor.contract.total_amount.label'|trans, entity.totalAmount|oro_format_currency) }}
+            {{ UI.renderHtmlProperty('dmkclub.sponsor.contract.attachment.label'|trans, oro_file_view(entity.attachment)) }}
+
+        </div>
+        <div class="responsive-block">
+        </div>
+    </div>
+</div>

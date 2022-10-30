@@ -4,8 +4,11 @@ channels:
           name: DMKClub\Bundle\SponsorBundle\Entity\Sponsor
           dependent:
               - DMKClub\Bundle\SponsorBundle\Entity\Category
+              - DMKClub\Bundle\SponsorBundle\Entity\Contract
+              - DMKClub\Bundle\SponsorBundle\Entity\ContractCategory
           navigation_items:
               - application_menu.customers_tab.dmkclub_sponsor
+              - application_menu.sales_tab.dmkclub_sponsor_contract
 
    channel_types:
         sponsor:

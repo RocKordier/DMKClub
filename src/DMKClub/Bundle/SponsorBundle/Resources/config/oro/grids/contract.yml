@@ -1,0 +1,171 @@
+datagrids:
+    dmkclub-sponsor-contracts-grid-base:
+        extended_entity_name: "%dmkclub.sponsor.contract.entity.class%"
+        acl_resource: dmkclub_sponsor_contract_view
+        source:
+            type: orm
+            query:
+                select:
+                    - c.id
+                    - c.name
+                    - cat.name As category
+                    - c.totalAmount
+                    - c.beginDate
+                    - c.endDate
+                    - c.isActive
+                    - c.createdAt
+                    - c.updatedAt
+                from:
+                    - { table: "%dmkclub.sponsor.contract.entity.class%", alias: c }
+                join:
+                    left:
+                        - { join: c.category, alias: cat }
+        columns:
+            isActive:
+                label:         dmkclub.sponsor.contract.is_active.label
+                type:          twig
+                template:      DMKClubBasicsBundle:Datagrid:Column/boolean.html.twig
+                frontend_type: html
+            name:
+                label:         dmkclub.sponsor.contract.name.label
+            category:
+                label:         dmkclub.sponsor.contractcategory.entity_label
+            totalAmount:
+                label:         dmkclub.sponsor.contract.total_amount.label
+                frontend_type: currency
+            beginDate:
+                label:         dmkclub.sponsor.contract.begin_date.label
+                frontend_type: date
+            endDate:
+                label:         dmkclub.sponsor.contract.end_date.label
+                frontend_type: date
+            createdAt:
+                label:         oro.ui.created_at
+                frontend_type: datetime
+                renderable:    false
+            updatedAt:
+                label:         oro.ui.updated_at
+                frontend_type: datetime
+        properties:
+            id: ~
+            view_link:
+                type:       url
+                route:      dmkclub_sponsor_contract_view
+                params:     [ id ]
+            update_link:
+                type:       url
+                route:      dmkclub_sponsor_contract_update
+                params:     [ id ]
+            delete_link:
+                type:       url
+                route:      dmkclub_api_delete_sponsor_contract
+                params:     [ id ]
+        sorters:
+            columns:
+                name:
+                    data_name: c.name
+                category:
+                    data_name: cat.name
+                beginDate:
+                    data_name: c.endDate
+                endDate:
+                    data_name: c.beginDate
+                createdAt:
+                    data_name: c.createdAt
+                updatedAt:
+                    data_name: c.updatedAt
+            default:
+                endDate:  "DESC"
+        filters:
+            columns:
+                name:
+                    type: string
+                    data_name: c.name
+                category:
+                    type: entity
+                    data_name: cat.name
+                    options:
+                        field_options:
+                            class: DMKClubSponsorBundle:ContractCategory
+                            choice_label: name
+                            multiple: true
+                            translatable_options: false
+                beginDate:
+                    type:      date
+                    data_name: c.beginDate
+                    enabled: false
+                endDate:
+                    type:      date
+                    data_name: c.endDate
+                isActive:
+                    type: boolean
+                    data_name: c.isActive
+                createdAt:
+                    type:      datetime
+                    data_name: c.createdAt
+                    enabled: false
+                updatedAt:
+                    type:      datetime
+                    data_name: c.updatedAt
+                    enabled: false
+        actions:
+            view:
+                type: navigate
+                acl_resource: dmkclub_sponsor_contract_view
+                label: oro.grid.action.view
+                icon: eye
+                link: view_link
+                rowAction: true
+            update:
+                type: navigate
+                acl_resource: dmkclub_sponsor_contract_update
+                label: oro.grid.action.update
+                icon: edit
+                link: update_link
+            delete:
+                type: delete
+                acl_resource: dmkclub_sponsor_contract_delete
+                label: oro.grid.action.delete
+                icon: trash
+                link: delete_link
+
+# ###
+# Main grid
+# ###
+    dmkclub-sponsor-contracts-grid:
+        extends: dmkclub-sponsor-contracts-grid-base
+        source:
+            query:
+                select:
+                    - s.id as sponsorId
+                    - s.name as sponsorName
+                join:
+                    left:
+                        - { join: c.sponsor, alias: s }
+        columns:
+            sponsorName:
+                label:         dmkclub.sponsor.entity_label
+                order:         1
+        sorters:
+            columns:
+                sponsorName:
+                    data_name: sponsorName
+        filters:
+            columns:
+                sponsorName:
+                    type: string
+                    data_name: sponsorName
+
+# ###
+# Contracts in sponsor
+# ###
+    dmkclub-sponsor-contracts-grid-sponsor:
+        extends: dmkclub-sponsor-contracts-grid-base
+        source:
+            query:
+                where:
+                    and:
+                        - c.sponsor = :sponsor
+            bind_parameters:
+                - sponsor
+                        

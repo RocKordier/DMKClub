@@ -1,4 +1,5 @@
 {% extends 'OroUIBundle:actions:view.html.twig' %}
+{% import 'OroDataGridBundle::macros.html.twig' as dataGrid %}
 {% import 'OroUIBundle::macros.html.twig' as UI %}
 {% import 'OroUIBundle::macros.html.twig' as macros %}
 
@@ -55,6 +56,38 @@
 
     {% set generalSubBlocks = [{'data' : [sponsorInformationWidget]}] %}
 
+    {% set contracts %}
+        {% set contractsGrid = 'dmkclub-sponsor-contracts-grid-sponsor' %}
+        {{ dataGrid.renderGrid(contractsGrid, {sponsor: entity.id}) }}
+        {% set dialogTitle = 'dmkclub.sponsor.contract.action.create.title'|trans %}
+    	{{ UI.clientButton({
+            	'dataUrl': path('dmkclub_sponsor_contract_create_by_sponsor', { 'sponsorId': entity.id }),
+            	'aCss': 'no-hash',
+            	'iCss': 'fa-plus-circle',
+            	'dataId': entity.id,
+            	'title' : dialogTitle,
+            	'label' : dialogTitle,
+            	'widget' : {
+                	'type' : 'dialog',
+                	'multiple' : false,
+                	'reload-grid-name' : contractsGrid,
+                	'options' : {
+                    	'stateEnabled': false,
+                    	'dialogOptions' : {
+                        	'title' : dialogTitle,
+                        	'allowMaximize': true,
+                        	'allowMinimize': true,
+                        	'dblclick': 'maximize',
+                        	'maximizedHeightDecreaseBy': 'minimize-bar',
+                        	'width': 800
+                    	}
+                	}
+            	}
+        	})
+    	}}
+
+    {% endset %}
+
     {# set sponsorAddressBookWidget %}
         <div class="responsive-cell">
             {{ oro_widget_render({
@@ -75,7 +108,9 @@
         },
         {
             'title': 'dmkclub.sponsor.contract.entity_plural_label'|trans,
-            'subblocks': [
+            'subblocks': [ {
+                    'data': [ contracts ]
+                }
             ]
         }
     ] %}

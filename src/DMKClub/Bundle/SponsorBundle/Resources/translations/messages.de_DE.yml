@@ -28,9 +28,33 @@ dmkclub:
         channel_type.sponsor.label: Sponsor
         form.choose_category:       Kategorie auswählen
         contract:
+          action:
+             create.title:          Einen neuen Vertrag anlegen
+          messages:
+             saved:                 Vertrag gespeichert
           entity_label:             Vertrag
           entity_plural_label:      Verträge
           entity_description:       Sponsoring-Verträge
+          information_label:        Über den Vertrag
+          id.label:                 ID
+          name.label:               Name
+          is_active.label:          Aktiv
+          category.label:           Kategorie
+          begin_date.label:         Beginn
+          end_date.label:           Ende
+          sponsor.label:            Sponsor
+          total_amount.label:       Gesamtsumme
+          attachment.label:         Dokument
+          organization.label:       Organisation
+          owner.label:              Eigentümer
+        contractcategory:
+          entity_label:             Vertragskategorie
+          entity_plural_label:      Vertragskategorien
+          entity_description:       Kategorien für Verträge
+          id.label:                 Id
+          name.label:               Name
+          organization.label:       Organisation
+          owner.label:              Eigentümer
     datagrid:
         actions:
             view:

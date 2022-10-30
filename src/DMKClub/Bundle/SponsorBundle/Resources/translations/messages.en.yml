@@ -17,26 +17,48 @@ dmkclub:
         category.label:       Category
         account.label:       Account
         contact.label:       Contact
-        start_date.label:  Start date
-        end_date.label:  End date
-        organization.label:  Organization
-        data_channel.label:  Data channel
+        start_date.label:           Start date
+        end_date.label:             End date
+        organization.label:         Organization
+        data_channel.label:         Data channel
         category:
           entity_label:             Category
           entity_plural_label:      Categories
-          entity_description:  Represent type of sponsor
-          id.label:            Id
-          name.label:          Name
-          organization.label:  Organization
-          owner.label:         Owner
+          entity_description:       Represent type of sponsor category
+          id.label:                 Id
+          name.label:               Name
+          organization.label:       Organization
+          owner.label:              Owner
         channel_type.sponsor.label: Sponsor
-        form.choose_category: Choose category
+        form.choose_category:       Choose category
         contract:
+          action:
+             create.title:          Create new contract
+          messages:
+             saved:                 Contract saved
           entity_label:             Contract
           entity_plural_label:      Contracts
-          entity_description:       Sponsoring contract
-          organization.label:  Organization
-          owner.label:         Owner
+          entity_description:       Represent type of sponsoring contract
+          information_label:        About contract
+          id.label:                 Id
+          name.label:               Name
+          is_active.label:          Is active
+          category.label:           Category
+          begin_date.label:         Begin date
+          end_date.label:           End date
+          sponsor.label:            Sponsor
+          total_amount.label:       Total amount
+          attachment.label:         Attachment
+          organization.label:       Organization
+          owner.label:              Owner
+        contractcategory:
+          entity_label:             Contract category
+          entity_plural_label:      Contract categories
+          entity_description:       Represent type of contract category
+          id.label:                 Id
+          name.label:               Name
+          organization.label:       Organization
+          owner.label:              Owner
     datagrid:
         actions:
             view:

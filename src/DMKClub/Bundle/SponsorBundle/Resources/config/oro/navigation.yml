@@ -9,10 +9,21 @@ navigation:
                     routes:      ['/^dmkclub_sponsor_(index|view)$/']
                     position:    200
                     description: 'dmkclub.sponsor.entity_plural_label'
+            dmkclub_sponsor_contract:
+                label:   'dmkclub.sponsor.contract.entity_plural_label'
+                route:   'dmkclub_sponsor_contract_index'
+                display: false
+                extras:
+                    routes:      ['/^dmkclub_sponsor_contract_(index|view)$/']
+                    position:    200
+                    description: 'dmkclub.sponsor.contract.entity_plural_label'
     
         tree:
             application_menu:
                 children:
+                    sales_tab:
+                        children:
+                            dmkclub_sponsor_contract: ~
                     customers_tab:
                         children:
                             dmkclub_sponsor: ~
@@ -24,4 +35,8 @@ navigation:
         dmkclub_sponsor_update: '%sponsor.name% - Edit'
         dmkclub_sponsorcategory_create: 'Create Category'
         dmkclub_sponsorcategory_update: '%sponsorcategory.name% - Edit'
-    
+
+        dmkclub_sponsor_contract_index: ~
+        dmkclub_sponsor_contract_view:  '%contract.name%'
+        dmkclub_sponsor_contract_create: 'Create sponsoring contract'
+        dmkclub_sponsor_contract_update: '%contract.name% - Edit'

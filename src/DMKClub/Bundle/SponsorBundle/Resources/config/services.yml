@@ -1,6 +1,8 @@
 parameters:
     dmkclub.sponsor.entity.class:               DMKClub\Bundle\SponsorBundle\Entity\Sponsor
     dmkclub.sponsorcategory.entity.class:       DMKClub\Bundle\SponsorBundle\Entity\Category
+    dmkclub.sponsor.contract.entity.class:      DMKClub\Bundle\SponsorBundle\Entity\Contract
+    dmkclub.sponsor.contractcategory.entity.class: DMKClub\Bundle\SponsorBundle\Entity\ContractCategory
 
 services:
 #    dmkclub_sponsor.sponsor.manager:
@@ -19,6 +21,15 @@ services:
             - '%dmkclub.sponsor.entity.class%'
             - '@doctrine.orm.entity_manager'
 
+    # Sponsoring contract API
+    dmkclub_sponsor.contract.manager.api:
+        public: true
+        class: Oro\Bundle\SoapBundle\Entity\Manager\ApiEntityManager
+        parent: oro_soap.manager.entity_manager.abstract
+        arguments:
+            - '%dmkclub.sponsor.contract.entity.class%'
+            - '@doctrine.orm.entity_manager'
+
     dmkclub_sponsor.form.autocomplete.category.search_handler:
         parent: oro_form.autocomplete.search_handler
         arguments:
@@ -26,3 +37,11 @@ services:
             - ["name"]
         tags:
             - { name: oro_form.autocomplete.search_handler, alias: dmkclub_sponsorcategories, acl_resource: dmkclub_sponsorcategory_view }
+
+    dmkclub_sponsor.form.autocomplete.contractcategory.search_handler:
+        parent: oro_form.autocomplete.search_handler
+        arguments:
+            - '%dmkclub.sponsor.contractcategory.entity.class%'
+            - ["name"]
+        tags:
+            - { name: oro_form.autocomplete.search_handler, alias: dmkclub_sponsor_contractcategories, acl_resource: dmkclub_sponsor_contractcategory_view }

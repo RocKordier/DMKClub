@@ -1,0 +1,34 @@
+datagrids:
+    dmkclub-sponsor-contractcategories-select-grid:
+        extended_entity_name: "%dmkclub.sponsor.contractcategory.entity.class%"
+        acl_resource: dmkclub_sponsor_contractcategory_view
+        source:
+            type: orm
+            query:
+                select:
+                    - c.id
+                    - c.name
+                    - c.createdAt
+                    - c.updatedAt
+                from:
+                    - { table: "%dmkclub.sponsor.contractcategory.entity.class%", alias: c }
+        columns:
+            name:
+                label:         dmkclub.sponsor.contractcategory.name.label
+            createdAt:
+                label:         oro.ui.created_at
+                frontend_type: datetime
+            updatedAt:
+                label:         oro.ui.updated_at
+                frontend_type: datetime
+        properties:
+            id: ~
+        sorters:
+            columns:
+                name:
+                    data_name: c.name
+        filters:
+            columns:
+                name:
+                    type: string
+                    data_name: c.name

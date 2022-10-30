@@ -140,6 +140,14 @@ class Sponsor extends ExtendSponsor implements ChannelAwareInterface
     protected $contact;
 
     /**
+     * @var Contact
+     *
+     * @ORM\ManyToOne(targetEntity="Oro\Bundle\ContactBundle\Entity\Contact", cascade="PERSIST")
+     * @ORM\JoinColumn(name="manager_id", referencedColumnName="id", onDelete="SET NULL")
+     */
+    protected $manager;
+
+    /**
      * @var Account
      *
      * @ORM\ManyToOne(targetEntity="Oro\Bundle\AccountBundle\Entity\Account", cascade="PERSIST")
@@ -172,6 +180,18 @@ class Sponsor extends ExtendSponsor implements ChannelAwareInterface
      * )
      */
     protected $category;
+
+    /**
+     *
+     * @ORM\OneToMany(targetEntity="\DMKClub\Bundle\SponsorBundle\Entity\Contract", mappedBy="sponsor", cascade={"all"}, orphanRemoval=true)
+     * @ConfigField(
+     *      defaultValues={
+     *          "dataaudit"={"auditable"=true},
+     *          "importexport"={"excluded"=true}
+     *      }
+     * )
+     */
+    private $contracts;
 
     /**
      * @var Address $billingAddress
@@ -229,7 +249,7 @@ class Sponsor extends ExtendSponsor implements ChannelAwareInterface
     public function __construct()
     {
         parent::__construct();
-
+        $this->contracts = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -475,6 +495,19 @@ class Sponsor extends ExtendSponsor implements ChannelAwareInterface
     public function getEndDate()
     {
         return $this->endDate;
+    }
+
+    /**
+     * Add member fee
+     *
+     * @param Contract $contract
+     * @return Sponsor
+     */
+    public function addContract(Contract $contract)
+    {
+        $contract->setSponsor($this);
+        $this->contracts[] = $contract;
+        return $this;
     }
 
     /**

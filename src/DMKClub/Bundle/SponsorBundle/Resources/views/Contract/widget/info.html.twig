@@ -1,0 +1,30 @@
+{% import 'OroUIBundle::macros.html.twig' as UI %}
+{% import 'OroTagBundle::macros.html.twig' as tag %}
+{% import 'OroEntityConfigBundle::macros.html.twig' as entityConfig %}
+
+{# 
+Detail-Infos zum Vertrag.
+Wird im ContractView verwendet
+ #}
+
+<div class="widget-content">
+    <div class="row-fluid form-horizontal">
+        <div class="responsive-block">
+            {{ UI.renderProperty('dmkclub.sponsor.contract.name.label'|trans, entity.name) }}
+
+            {%- if is_granted('dmkclub_sponsor_view') and entity.sponsor -%}
+                {% set sponsorView = '<a href="' ~ path('dmkclub_sponsor_view', {'id': entity.sponsor.id}) ~ '">' ~ entity.sponsor|oro_format_name|escape ~ '</a>' %}
+            {%- else -%}
+                {% set sponsorView = entity.sponsor ? entity.sponsor : '' %}
+            {%- endif -%}
+            {{ UI.renderHtmlProperty('dmkclub.sponsor.contract.sponsor.label'|trans, sponsorView) }}
+            {%- if entity.category -%}
+            	{{ UI.renderHtmlProperty('dmkclub.sponsor.contract.category.label'|trans, entity.category.name) }}
+            {%- endif -%}
+
+        </div>
+        <div class="responsive-block">
+            {{ entityConfig.renderDynamicFields(entity) }}
+        </div>
+    </div>
+</div>
