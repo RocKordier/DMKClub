@@ -163,6 +163,42 @@ class Sponsor extends ExtendSponsor implements ChannelAwareInterface
     protected $isActive = false;
 
     /**
+     * @var double
+     *
+     * @ORM\Column(name="lifetime", type="money", nullable=true)
+     * @ConfigField(
+     *      defaultValues={
+     *          "dataaudit"={
+     *              "auditable"=true
+     *          },
+     *          "importexport"={
+     *              "full"=true,
+     *              "order"=15
+     *          }
+     *      }
+     * )
+     */
+    protected $lifetime = 0;
+
+    /**
+     * @var double
+     *
+     * @ORM\Column(name="nowvalue", type="money", nullable=true)
+     * @ConfigField(
+     *      defaultValues={
+     *          "dataaudit"={
+     *              "auditable"=true
+     *          },
+     *          "importexport"={
+     *              "full"=true,
+     *              "order"=15
+     *          }
+     *      }
+     * )
+     */
+    protected $nowvalue = 0;
+
+    /**
      * @var Collection
      *
      * @ORM\ManyToOne(targetEntity="DMKClub\Bundle\SponsorBundle\Entity\Category")
@@ -378,6 +414,46 @@ class Sponsor extends ExtendSponsor implements ChannelAwareInterface
     public function getIsActive()
     {
         return $this->isActive;
+    }
+
+    /**
+     * @return float
+     */
+    public function getLifetime()
+    {
+        return $this->lifetime;
+    }
+
+    /**
+     * @param float $lifetime
+     *
+     * @return $this
+     */
+    public function setLifetime($lifetime)
+    {
+        $this->lifetime = $lifetime;
+
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getNowValue()
+    {
+        return $this->nowvalue;
+    }
+
+    /**
+     * @param float $lifetime
+     *
+     * @return $this
+     */
+    public function setNowValue($value)
+    {
+        $this->nowvalue = $value;
+
+        return $this;
     }
 
     /**

@@ -2,6 +2,12 @@
 
 namespace DMKClub\Bundle\SponsorBundle\Model;
 
+/**
+ *
+ * @method \Oro\Bundle\EntityExtendBundle\Entity\AbstractEnumValue getShippingWay()
+ * @method ExtendContract setShippingWay(\Oro\Bundle\EntityExtendBundle\Entity\AbstractEnumValue $status)
+ *
+ */
 class ExtendContract
 {
     /**

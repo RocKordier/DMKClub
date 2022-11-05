@@ -15,6 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Oro\Bundle\FormBundle\Form\Type\OroDateType;
 use Oro\Bundle\AttachmentBundle\Form\Type\MultiFileType;
 use Oro\Bundle\AttachmentBundle\Form\Type\FileType;
+use Oro\Bundle\EntityExtendBundle\Form\Type\EnumSelectType;
+use DMKClub\Bundle\SponsorBundle\Model\ContractShipping;
 
 class ContractType extends AbstractType
 {
@@ -62,6 +64,11 @@ class ContractType extends AbstractType
         ->add('endDate', OroDateType::class, [
             'required' => true,
             'label' => self::LABEL_PREFIX . 'end_date.label'
+        ])
+        ->add('shippingWay', EnumSelectType::class, [
+            'required' => true,
+            'label' => self::LABEL_PREFIX . 'shipping_way.label',
+            'enum_code' => ContractShipping::INTERNAL_ENUM_CODE
         ])
         ->add('attachment', FileType::class, [
             'label' => self::LABEL_PREFIX . 'attachment.label',

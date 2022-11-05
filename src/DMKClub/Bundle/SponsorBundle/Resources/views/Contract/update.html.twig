@@ -75,6 +75,7 @@
         form_row(form.endDate),
         form_row(form.totalAmount),
         form_row(form.attachment),
+        form_row(form.shippingWay),
         ]) %}
     {% if form.owner is defined %}
         {% set formFields = formFields|merge([form_row(form.owner)]) %}

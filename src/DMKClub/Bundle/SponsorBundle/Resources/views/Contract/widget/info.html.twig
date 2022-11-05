@@ -21,6 +21,7 @@ Wird im ContractView verwendet
             {%- if entity.category -%}
             	{{ UI.renderHtmlProperty('dmkclub.sponsor.contract.category.label'|trans, entity.category.name) }}
             {%- endif -%}
+            {{ UI.renderProperty('dmkclub.sponsor.contract.shipping_way.label'|trans, entity.shippingWay ? entity.shippingWay.name : '-') }}
 
         </div>
         <div class="responsive-block">

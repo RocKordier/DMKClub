@@ -46,6 +46,7 @@ dmkclub:
           category.label:           Category
           begin_date.label:         Begin date
           end_date.label:           End date
+          shipping_way.label:       Shipping
           sponsor.label:            Sponsor
           total_amount.label:       Total amount
           attachment.label:         Attachment

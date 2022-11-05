@@ -17,5 +17,6 @@ channels:
                 - DMKClub\Bundle\SponsorBundle\Entity\Sponsor
                 - DMKClub\Bundle\SponsorBundle\Entity\Category
             customer_identity: DMKClub\Bundle\SponsorBundle\Entity\Sponsor
+            lifetime_value: lifetime
             system: false
             priority: -20
