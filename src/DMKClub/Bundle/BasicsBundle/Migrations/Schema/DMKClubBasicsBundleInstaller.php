@@ -27,7 +27,7 @@ class DMKClubBasicsBundleInstaller implements Installation
     /**
      * Create dmkclub_basics_twigtemplate table.
      */
-    protected function createDmkclubBasicsTwigtemplateTable(Schema $schema): void
+    private function createDmkclubBasicsTwigtemplateTable(Schema $schema): void
     {
         $table = $schema->createTable('dmkclub_basics_twigtemplate');
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
@@ -48,7 +48,7 @@ class DMKClubBasicsBundleInstaller implements Installation
     /**
      * Add dmkclub_basics_twigtemplate foreign keys.
      */
-    protected function addDmkclubBasicsTwigtemplateForeignKeys(Schema $schema): void
+    private function addDmkclubBasicsTwigtemplateForeignKeys(Schema $schema): void
     {
         $table = $schema->getTable('dmkclub_basics_twigtemplate');
         $table->addForeignKeyConstraint(

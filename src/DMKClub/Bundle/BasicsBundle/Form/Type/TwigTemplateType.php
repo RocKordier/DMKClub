@@ -24,7 +24,7 @@ class TwigTemplateType extends AbstractType
         $this->buildPlainFields($builder, $options);
     }
 
-    protected function buildPlainFields(FormBuilderInterface $builder, array $options): void
+    private function buildPlainFields(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('name', TextType::class, [
             'required' => true,

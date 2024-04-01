@@ -60,7 +60,7 @@ readonly class DownloadPdfHandler implements MassActionHandlerInterface
         return $this->getResponse($args, $data);
     }
 
-    protected function handleExport(array $options, array $data, IterableResultInterface $results): array
+    private function handleExport(array $options, array $data, IterableResultInterface $results): array
     {
         $jobData = [
             'data_identifier' => $options['data_identifier'],
@@ -96,7 +96,7 @@ readonly class DownloadPdfHandler implements MassActionHandlerInterface
         return $this->entityManager->getRepository(MemberFee::class);
     }
 
-    protected function isAllSelected(array $data): bool
+    private function isAllSelected(array $data): bool
     {
         return \array_key_exists('inset', $data) && '0' === $data['inset'];
     }
@@ -104,7 +104,7 @@ readonly class DownloadPdfHandler implements MassActionHandlerInterface
     /**
      * @return MassActionResponse
      */
-    protected function getResponse(MassActionHandlerArgs $args, $data = 0)
+    private function getResponse(MassActionHandlerArgs $args, $data = 0)
     {
         $entitiesCount = $data['items'];
         $fileName = $data['filename'];

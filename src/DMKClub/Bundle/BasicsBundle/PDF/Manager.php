@@ -90,7 +90,7 @@ readonly class Manager
         return $this->gaufretteFileManager->getFile($fileName);
     }
 
-    protected function createPdf(TwigTemplate $twigTemplate, $filename, array $context = []): string
+    private function createPdf(TwigTemplate $twigTemplate, $filename, array $context = []): string
     {
         if ($generatorName = $twigTemplate->generator) {
             // Call generator

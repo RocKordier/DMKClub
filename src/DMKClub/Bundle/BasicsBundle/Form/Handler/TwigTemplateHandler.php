@@ -39,7 +39,7 @@ readonly class TwigTemplateHandler implements FormHandlerInterface
         return false;
     }
 
-    protected function onSuccess(TwigTemplate $entity): void
+    private function onSuccess(TwigTemplate $entity): void
     {
         $this->manager->persist($entity);
         $this->manager->flush();

@@ -80,7 +80,7 @@ readonly class ExportPdfProcessor implements MessageProcessorInterface, TopicSub
     /**
      * @param class-string $entityName
      */
-    protected function resolveEntity(int $itemId, string $entityName): ?object
+    private function resolveEntity(int $itemId, string $entityName): ?object
     {
         $repo = $this->em->getRepository($entityName);
 

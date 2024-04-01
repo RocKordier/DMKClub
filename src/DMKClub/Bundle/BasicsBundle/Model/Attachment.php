@@ -31,7 +31,7 @@ class Attachment
     /**
      * Check the payload.
      */
-    protected function assert(): void
+    private function assert(): void
     {
         if (!$this->filename) {
             throw new \Exception('No valid "filename" found in message');

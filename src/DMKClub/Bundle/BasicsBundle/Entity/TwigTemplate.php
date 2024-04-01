@@ -35,7 +35,7 @@ use Symfony\Component\Yaml\Yaml;
 )]
 class TwigTemplate implements \Stringable
 {
-    #[ORM\Id] #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Id] #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: Types::INTEGER)]
     #[ConfigField(defaultValues: [])]
     public int $id;
