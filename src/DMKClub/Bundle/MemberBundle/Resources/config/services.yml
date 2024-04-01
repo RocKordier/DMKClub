@@ -77,7 +77,7 @@ services:
     dmkclub_member.memberfee.pdf.simplegenerator:
         class: "%dmkclub_member.memberfee.pdf.simplegenerator.class%"
         arguments:
-            - "@white_october.tcpdf"
+            - "@qipsius.tcpdf"
             - "@translator"
             - "@twig"
         tags:

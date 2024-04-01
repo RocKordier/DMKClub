@@ -4,6 +4,7 @@ parameters:
     dmkclub_basics.utility.datagrids.class:      DMKClub\Bundle\BasicsBundle\Utility\Datagrids
 
 services:
+    Qipsius\TCPDFBundle\Controller\TCPDFController: '@qipsius.tcpdf'
 
     dmkclub_basics.pdf.file_manager:
         class: 'DMKClub\Bundle\BasicsBundle\PDF\FileManager'
@@ -14,7 +15,7 @@ services:
     DMKClub\Bundle\BasicsBundle\PDF\Manager:
         public: true
         arguments:
-            - "@white_october.tcpdf"
+            - "@qipsius.tcpdf"
             - "@twig"
             - "@oro_importexport.file.file_manager"
             - '@oro_importexport.file_manager'

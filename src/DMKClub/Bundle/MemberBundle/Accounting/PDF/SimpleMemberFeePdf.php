@@ -1,6 +1,7 @@
 <?php
 namespace DMKClub\Bundle\MemberBundle\Accounting\PDF;
 
+use Qipsius\TCPDFBundle\Controller\TCPDFController;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Oro\Bundle\ContactBundle\Entity\Contact;
@@ -32,10 +33,10 @@ class SimpleMemberFeePdf implements GeneratorInterface
     /** @var Environment */
     protected $twig;
 
-    /** @var \WhiteOctober\TCPDFBundle\Controller\TCPDFController */
+    /** @var TCPDFController */
     protected $tcpdfController;
 
-    public function __construct(\WhiteOctober\TCPDFBundle\Controller\TCPDFController $tcpdfController, TranslatorInterface $translator, Environment $twig)
+    public function __construct(TCPDFController $tcpdfController, TranslatorInterface $translator, Environment $twig)
     {
         $this->tcpdfController = $tcpdfController;
         $this->translator = $translator;

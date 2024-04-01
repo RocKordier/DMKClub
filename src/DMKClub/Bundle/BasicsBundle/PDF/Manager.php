@@ -7,6 +7,7 @@ use Oro\Bundle\ImportExportBundle\File\FileManager;
 use Oro\Bundle\GaufretteBundle\FileManager as GaufretteFileManager;
 
 use DMKClub\Bundle\BasicsBundle\Entity\TwigTemplate;
+use Qipsius\TCPDFBundle\Controller\TCPDFController;
 use Twig\Environment;
 
 /**
@@ -41,7 +42,7 @@ class Manager
      *
      * @param \TCPDF $tcpdf
      */
-    public function __construct(\WhiteOctober\TCPDFBundle\Controller\TCPDFController $tcpdf, Environment $twig, FileManager $fm, GaufretteFileManager $gaufretteFileManager, Logger $logger)
+    public function __construct(TCPDFController $tcpdf, Environment $twig, FileManager $fm, GaufretteFileManager $gaufretteFileManager, Logger $logger)
     {
         $this->tcpdf = $tcpdf;
         $this->twig = clone $twig;
