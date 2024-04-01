@@ -1,0 +1,8 @@
+parameters:
+    level: max
+    checkMissingIterableValueType: false
+    checkGenericClassInNonGenericObjectType: false
+    paths:
+        - %currentWorkingDirectory%/src
+    excludePaths:
+        - %currentWorkingDirectory%/src/**/Tests/*
