@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\BasicsBundle\DataGrid\Extension\MassAction;
 
 use Oro\Bundle\DataGridBundle\Extension\Action\ActionConfiguration;
@@ -6,17 +9,12 @@ use Oro\Bundle\DataGridBundle\Extension\MassAction\Actions\AbstractMassAction;
 
 class ExportPdfAction extends AbstractMassAction
 {
-
     /** @var array */
     protected $requiredOptions = [
         'entity_name',
-        'data_identifier'
+        'data_identifier',
     ];
 
-    /**
-     *
-     * {@inheritdoc}
-     */
     public function setOptions(ActionConfiguration $options)
     {
         if (empty($options['route'])) {

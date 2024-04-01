@@ -1,23 +1,22 @@
 <?php
+
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\BasicsBundle\DataGrid\Extension\MassAction;
 
 use Oro\Bundle\DataGridBundle\Extension\Action\ActionConfiguration;
+use Oro\Bundle\DataGridBundle\Extension\Action\Actions\AbstractAction;
 use Oro\Bundle\DataGridBundle\Extension\MassAction\Actions\AbstractMassAction;
 
 class DownloadPdfAction extends AbstractMassAction
 {
-
     /** @var array */
     protected $requiredOptions = [
         'entity_name',
-        'data_identifier'
+        'data_identifier',
     ];
 
-    /**
-     *
-     * {@inheritdoc}
-     */
-    public function setOptions(ActionConfiguration $options)
+    public function setOptions(ActionConfiguration $options): AbstractMassAction|self|AbstractAction
     {
         if (empty($options['route'])) {
             // Wir nutzen den zentralen Controller von Oro für den Dispatch

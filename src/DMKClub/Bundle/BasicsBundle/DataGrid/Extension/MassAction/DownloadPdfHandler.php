@@ -1,75 +1,45 @@
 <?php
+
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\BasicsBundle\DataGrid\Extension\MassAction;
 
-use Doctrine\ORM\EntityManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-
-use Oro\Bundle\DataGridBundle\Datasource\Orm\IterableResultInterface;
-use Oro\Bundle\DataGridBundle\Extension\MassAction\MassActionHandlerInterface;
-use Oro\Bundle\DataGridBundle\Extension\MassAction\MassActionHandlerArgs;
-use Oro\Bundle\DataGridBundle\Extension\MassAction\MassActionResponse;
-
-use DMKClub\Bundle\BasicsBundle\PDF\Manager;
-use Symfony\Component\Routing\RouterInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use DMKClub\Bundle\BasicsBundle\Datasource\ORM\NoOrderingIterableResult;
+use DMKClub\Bundle\BasicsBundle\PDF\Manager;
+use DMKClub\Bundle\MemberBundle\Entity\MemberFee;
+use DMKClub\Bundle\MemberBundle\Entity\Repository\MemberFeeRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Oro\Bundle\DataGridBundle\Datasource\Orm\IterableResultInterface;
+use Oro\Bundle\DataGridBundle\Extension\MassAction\MassActionHandlerArgs;
+use Oro\Bundle\DataGridBundle\Extension\MassAction\MassActionHandlerInterface;
+use Oro\Bundle\DataGridBundle\Extension\MassAction\MassActionResponse;
+use Oro\Bundle\DataGridBundle\Extension\MassAction\MassActionResponseInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Generic handler to download a combined PDF. The source of PDF is created by callback.
  */
-class DownloadPdfHandler implements MassActionHandlerInterface
+readonly class DownloadPdfHandler implements MassActionHandlerInterface
 {
+    public const int FLUSH_BATCH_SIZE = 100;
 
-    const FLUSH_BATCH_SIZE = 100;
-
-    /**
-     *
-     * @var EntityManager
-     */
-    protected $entityManager;
-
-    /**
-     *
-     * @var TranslatorInterface
-     */
-    protected $translator;
-
-    /** @var \Psr\Log\LoggerInterface */
-    private $logger;
-
-    /** @var \DMKClub\Bundle\BasicsBundle\PDF\Manager */
-    private $pdfManager;
-
-    protected $router;
-
-    /**
-     *
-     * @param EntityManager $entityManager
-     * @param TranslatorInterface $translator
-     */
     public function __construct(
-        EntityManagerInterface $entityManager, TranslatorInterface $translator, LoggerInterface $logger,
-        Manager $pdfManager, RouterInterface $router)
-    {
-        $this->entityManager = $entityManager;
-        $this->translator = $translator;
-        $this->logger = $logger;
-        $this->router = $router;
-        $this->pdfManager = $pdfManager;
-    }
+        private EntityManagerInterface $entityManager,
+        private TranslatorInterface $translator,
+        private LoggerInterface $logger,
+        private Manager $pdfManager,
+        private RouterInterface $router
+    ) {}
 
-    /**
-     *
-     * {@inheritdoc}
-     */
-    public function handle(MassActionHandlerArgs $args)
+    public function handle(MassActionHandlerArgs $args): MassActionResponseInterface
     {
         $data = $args->getData();
         $massAction = $args->getMassAction();
         $options = $massAction->getOptions()->toArray();
         $queryBuilder = $args->getResults()->getSource();
-        $results      = new NoOrderingIterableResult($queryBuilder);
+        $results = new NoOrderingIterableResult($queryBuilder);
         $results->setBufferSize(self::FLUSH_BATCH_SIZE);
 
         $this->entityManager->beginTransaction();
@@ -83,24 +53,18 @@ class DownloadPdfHandler implements MassActionHandlerInterface
                 'options' => $options,
             ]);
             $this->entityManager->rollback();
+
             return new MassActionResponse(false, $e->getMessage(), []);
         }
 
         return $this->getResponse($args, $data);
     }
 
-    /**
-     *
-     * @param array $options
-     * @param array $data
-     * @param IterableResultInterface $results
-     * @return int
-     */
-    protected function handleExport($options, $data, IterableResultInterface $results)
+    protected function handleExport(array $options, array $data, IterableResultInterface $results): array
     {
         $jobData = [
             'data_identifier' => $options['data_identifier'],
-            'entity_name' => $options['entity_name']
+            'entity_name' => $options['entity_name'],
         ];
 
         $entityIds = [];
@@ -111,51 +75,33 @@ class DownloadPdfHandler implements MassActionHandlerInterface
 
         // $this->entityManager->flush();
 
-        if (array_key_exists('entity_ids', $jobData)) {
+        $ids = explode(',', $jobData['entity_ids']);
 
-            $ids = explode(',', $jobData['entity_ids']);
-
-            $file = $this->pdfManager->buildPdfCombined(function ($pdfCallBack) use ($ids) {
-                foreach ($ids as $id) {
-                    $memberFee = $this->getMemberFeeRepository()
-                        ->findOneBy([
-                        'id' => $id
-                    ]);
-                    $pdfCallBack($memberFee);
-                }
-            });
-        }
+        $file = $this->pdfManager->buildPdfCombined(function ($pdfCallBack) use ($ids) {
+            foreach ($ids as $id) {
+                $memberFee = $this->getMemberFeeRepository()
+                    ->findOneBy(['id' => $id]);
+                $pdfCallBack($memberFee);
+            }
+        });
 
         return [
-            'items' => count($entityIds),
-            'filename' => $file->getKey()
+            'items' => \count($entityIds),
+            'filename' => $file->getKey(),
         ];
     }
 
-    /**
-     *
-     * @return \DMKClub\Bundle\MemberBundle\Entity\Repository\MemberFeeRepository
-     */
-    public function getMemberFeeRepository()
+    public function getMemberFeeRepository(): MemberFeeRepository
     {
-        return $this->entityManager->getRepository('DMKClubMemberBundle:MemberFee');
+        return $this->entityManager->getRepository(MemberFee::class);
+    }
+
+    protected function isAllSelected(array $data): bool
+    {
+        return \array_key_exists('inset', $data) && '0' === $data['inset'];
     }
 
     /**
-     *
-     * @param array $data
-     * @return bool
-     */
-    protected function isAllSelected($data)
-    {
-        return array_key_exists('inset', $data) && $data['inset'] === '0';
-    }
-
-    /**
-     *
-     * @param MassActionHandlerArgs $args
-     * @param int $entitiesCount
-     *
      * @return MassActionResponse
      */
     protected function getResponse(MassActionHandlerArgs $args, $data = 0)
@@ -169,19 +115,19 @@ class DownloadPdfHandler implements MassActionHandlerInterface
 
         $successful = $entitiesCount > 0;
         $options = [
-            'count' => $entitiesCount
+            'count' => $entitiesCount,
         ];
 
         $url = '';
         if ($entitiesCount > 0) {
             $url = $this->router->generate('dmkclub_basics_export_download', [
-                'fileName' => basename($fileName)
+                'fileName' => basename($fileName),
             ]);
         }
         $options['url'] = $url;
 
-        return new MassActionResponse($successful, $this->translator->transChoice($responseMessage, $entitiesCount, [
-            '%count%' => $entitiesCount
+        return new MassActionResponse($successful, $this->translator->trans($responseMessage, $entitiesCount, [
+            '%count%' => $entitiesCount,
         ]), $options);
     }
 }
