@@ -1,91 +1,53 @@
 <?php
+
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\BasicsBundle\Async\Pdf;
 
+use DMKClub\Bundle\BasicsBundle\Async\Topic\ExportPdfDelayedTopic;
+use DMKClub\Bundle\BasicsBundle\PDF\Manager;
+use DMKClub\Bundle\BasicsBundle\PDF\PdfAwareInterface;
 use Doctrine\ORM\EntityManager;
-use Gaufrette\Filesystem;
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
-use Psr\Log\LoggerInterface;
-
-use Oro\Component\MessageQueue\Consumption\MessageProcessorInterface;
 use Oro\Component\MessageQueue\Client\TopicSubscriberInterface;
+use Oro\Component\MessageQueue\Consumption\MessageProcessorInterface;
+use Oro\Component\MessageQueue\Job\JobRunner;
 use Oro\Component\MessageQueue\Transport\MessageInterface;
 use Oro\Component\MessageQueue\Transport\SessionInterface;
 use Oro\Component\MessageQueue\Util\JSON;
-use Oro\Component\MessageQueue\Job\JobRunner;
-
-use DMKClub\Bundle\BasicsBundle\Async\Topics;
-use DMKClub\Bundle\BasicsBundle\PDF\Manager;
-use DMKClub\Bundle\BasicsBundle\PDF\PdfAwareInterface;
+use Psr\Log\LoggerInterface;
 
 /**
- * Die Klasse erzeugt die PDF Dateien
- *
+ * This Processor creates PDF files.
  */
-class ExportPdfProcessor implements MessageProcessorInterface, TopicSubscriberInterface
+readonly class ExportPdfProcessor implements MessageProcessorInterface, TopicSubscriberInterface
 {
+    public const string OPTION_ENTITY_ID = 'entity_id';
 
-    /**
-     *
-     * @var JobRunner
-     */
-    private $jobRunner;
+    public function __construct(
+        private JobRunner $jobRunner,
+        private EntityManager $em,
+        private Manager $pdfManager,
+        private FilesystemMap $fileSystemMap,
+        private LoggerInterface $logger
+    ) {}
 
-    /** @var \Psr\Log\LoggerInterface */
-    private $logger;
-
-    /**
-     *
-     * @var \Doctrine\ORM\EntityManager
-     */
-    private $em;
-    /**
-     * @var FilesystemMap
-     */
-    protected $fileSystemMap = NULL;
-    /**
-     * @var Filesystem
-     */
-    protected $fs = NULL;
-
-    /**
-     * @var Manager
-     */
-    protected $pdfManager;
-
-    const OPTION_ENTITYID = 'entity_id';
-
-    public function __construct(JobRunner $jobRunner, EntityManager $em, Manager $pdfManager, FilesystemMap $fileSystemMap, LoggerInterface $logger)
-    {
-        $this->jobRunner     = $jobRunner;
-        $this->em            = $em;
-        $this->pdfManager    = $pdfManager;
-        $this->fileSystemMap = $fileSystemMap;
-        $this->logger        = $logger;
-    }
-
-    /**
-     *
-     * {@inheritdoc}
-     *
-     * @see \Oro\Component\MessageQueue\Client\TopicSubscriberInterface::getSubscribedTopics()
-     */
-    public static function getSubscribedTopics()
+    public static function getSubscribedTopics(): array
     {
         return [
-            Topics::EXPORT_PDF_DELAYED
+            ExportPdfDelayedTopic::getName(),
         ];
     }
 
     /**
-     * Processes entity to generate pdf
-     *
+     * Processes entity to generate pdf.
      */
-    public function process(MessageInterface $message, SessionInterface $session)
+    public function process(MessageInterface $message, SessionInterface $session): string
     {
-        $result = false;
+        /** @var array $data */
         $data = JSON::decode($message->getBody());
 
-        if (! isset($data['jobId'], $data[self::OPTION_ENTITYID], $data[ExportPdfsMessageProcessor::OPTION_ENTITYNAME])) {
+        if (!isset($data['jobId'], $data[self::OPTION_ENTITY_ID], $data[ExportPdfsMessageProcessor::OPTION_ENTITYNAME])) {
             $this->logger->critical('Got invalid message', $data);
 
             return self::REJECT;
@@ -93,9 +55,8 @@ class ExportPdfProcessor implements MessageProcessorInterface, TopicSubscriberIn
 
         $result = $this->jobRunner->runDelayed($data['jobId'], function () use ($data) {
             try {
-                $entity = $this->resolveEntity($data[self::OPTION_ENTITYID], $data[ExportPdfsMessageProcessor::OPTION_ENTITYNAME]);
+                $entity = $this->resolveEntity($data[self::OPTION_ENTITY_ID], $data[ExportPdfsMessageProcessor::OPTION_ENTITYNAME]);
                 if ($entity instanceof PdfAwareInterface) {
-                    /* @var $entity PdfAwareInterface */
                     $file = $this->pdfManager->buildPdf($entity);
                     $fs = $this->fileSystemMap->get($entity->getExportFilesystem());
                     $fileName = $file->getKey();
@@ -104,23 +65,25 @@ class ExportPdfProcessor implements MessageProcessorInterface, TopicSubscriberIn
             } catch (\Exception $e) {
                 $this->logger->critical('PDF creation failed', [
                     'Exception' => $e->getMessage(),
-                    'data' => $data
+                    'data' => $data,
                 ]);
+
                 return false;
             }
+
             return true;
         });
+
         return $result ? self::ACK : self::REJECT;
     }
 
     /**
-     *
-     * @param int $itemId
-     * @param string $entityName
-     * @return object|null
+     * @param class-string $entityName
      */
-    protected function resolveEntity($itemId, $entityName) {
+    protected function resolveEntity(int $itemId, string $entityName): ?object
+    {
         $repo = $this->em->getRepository($entityName);
-        return $repo->findOneById($itemId);
+
+        return $repo->findOneBy(['id' => $itemId]);
     }
 }
