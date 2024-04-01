@@ -1,66 +1,36 @@
 <?php
+
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\BasicsBundle\PDF;
 
-use Monolog\Logger;
-use Gaufrette\File;
-use Oro\Bundle\ImportExportBundle\File\FileManager;
-use Oro\Bundle\GaufretteBundle\FileManager as GaufretteFileManager;
-
 use DMKClub\Bundle\BasicsBundle\Entity\TwigTemplate;
+use DMKClub\Bundle\BasicsBundle\PDF\Generator\GeneratorRegistryInterface;
+use Gaufrette\File;
+use Monolog\Logger;
+use Oro\Bundle\GaufretteBundle\FileManager as GaufretteFileManager;
+use Oro\Bundle\ImportExportBundle\File\FileManager;
 use Qipsius\TCPDFBundle\Controller\TCPDFController;
 use Twig\Environment;
 
-/**
- * Class PDF-Manager
- *
- * @package DMKClub\Bundle\DMKClubBasicsBundle\PDF
- */
-class Manager
+readonly class Manager
 {
-    /**
-     *
-     * @var array
-     */
-    protected $generators = [];
-
-    /** @var \TCPDF */
-    protected $tcpdf;
-
-    /** @var FileManager */
-    protected $fileManager;
-
-    /** @var GaufretteFileManager */
-    private $gaufretteFileManager;
-
-    /** @var Logger */
-    protected $logger;
-
-    /** Environment */
-    protected $twig;
+    public function __construct(
+        private TCPDFController $tcpdf,
+        private Environment $twig,
+        private FileManager $fileManager,
+        private GaufretteFileManager $gaufretteFileManager,
+        private Logger $logger,
+        private GeneratorRegistryInterface $generatorRegistry,
+    ) {}
 
     /**
-     *
-     * @param \TCPDF $tcpdf
-     */
-    public function __construct(TCPDFController $tcpdf, Environment $twig, FileManager $fm, GaufretteFileManager $gaufretteFileManager, Logger $logger)
-    {
-        $this->tcpdf = $tcpdf;
-        $this->twig = clone $twig;
-        $this->fileManager = $fm;
-        $this->gaufretteFileManager = $gaufretteFileManager;
-        $this->logger = $logger;
-    }
-
-    /**
-     *
-     * @param PdfAwareInterface $entity
      * @throws PdfException
-     * @return File
      */
     public function buildPdf(PdfAwareInterface $entity): File
     {
         $twigTemplate = $entity->getTemplate();
-        if (! $twigTemplate) {
+        if (!$twigTemplate) {
             throw new PdfException('No template instance found');
         }
 
@@ -69,21 +39,21 @@ class Manager
         $localFile = $this->fileManager->generateTmpFilePath($fileName);
         try {
             $this->createPdf($twigTemplate, $localFile, [
-                'entity' => $entity
+                'entity' => $entity,
             ]);
             $this->fileManager->writeFileToStorage($localFile, $fileName, true);
         } catch (\Exception $e) {
             $this->logger->error('Error generating pdf file', [
                 'e' => $e,
-                'local file' => $localFile
+                'local file' => $localFile,
             ]);
             throw new PdfException('Error generating pdf file', 0, $e);
-        }
-        finally {
+        } finally {
             if (file_exists($localFile)) {
                 unlink($localFile);
             }
         }
+
         return $this->gaufretteFileManager->getFile($fileName);
     }
 
@@ -93,18 +63,17 @@ class Manager
         $pdfGenerator = null;
 
         $nextEntity(function (PdfAwareInterface $entity) use ($twigTemplate, &$pdfGenerator) {
-            if ($twigTemplate === null) {
+            if (null === $twigTemplate) {
                 $twigTemplate = $entity->getTemplate();
-                if (! $twigTemplate) {
+                if (!$twigTemplate) {
                     throw new PdfException('No template instance found');
                 }
-                if ($pdfGenerator === null) {
-                    // Call generator
-                    $pdfGenerator = $this->getGeneratorByName($twigTemplate->getGenerator());
+                if (null === $pdfGenerator) {
+                    $pdfGenerator = $this->generatorRegistry->get($twigTemplate->generator);
                     $pdfGenerator->combinedInit($twigTemplate);
                 }
                 $pdfGenerator->combinedExecute($twigTemplate, [
-                    'entity' => $entity
+                    'entity' => $entity,
                 ]);
             }
         });
@@ -121,16 +90,11 @@ class Manager
         return $this->gaufretteFileManager->getFile($fileName);
     }
 
-    /**
-     *
-     * @param TwigTemplate $twigTemplate
-     * @return string filename
-     */
-    protected function createPdf(TwigTemplate $twigTemplate, $filename, array $context = array())
+    protected function createPdf(TwigTemplate $twigTemplate, $filename, array $context = []): string
     {
-        if ($generatorName = $twigTemplate->getGenerator()) {
+        if ($generatorName = $twigTemplate->generator) {
             // Call generator
-            $generator = $this->getGeneratorByName($generatorName);
+            $generator = $this->generatorRegistry->get($generatorName);
             $generator->execute($twigTemplate, $filename, $context);
         } else {
             $this->generateByTemplate($twigTemplate, $filename, $context);
@@ -139,23 +103,16 @@ class Manager
         return $filename;
     }
 
-    /**
-     *
-     * @param TwigTemplate $twigTemplate
-     * @param string $filename
-     * @param array $context
-     * @return string filename
-     */
-    public function generateByTemplate(TwigTemplate $twigTemplate, $filename, array $context = array())
+    public function generateByTemplate(TwigTemplate $twigTemplate, string $filename, array $context = []): \TCPDF
     {
         // Zuerst das HTML erzeugen
-        $template = $this->twig->createTemplate($twigTemplate->getTemplate());
+        $template = $this->twig->createTemplate($twigTemplate->template);
         $html = $template->render($context);
 
         // mit Daten aus Template initialisieren
-        $orientation = $twigTemplate->getOrientation() ? $twigTemplate->getOrientation() : 'P';
+        $orientation = $twigTemplate->orientation ?: 'P';
         // Format kann auch ein assoziatives Array sein.
-        $pageFormat = $twigTemplate->getPageFormat() ? $twigTemplate->getPageFormatStructured() : 'A4';
+        $pageFormat = $twigTemplate->pageFormat ? $twigTemplate->getPageFormatStructured() : 'A4';
         $pdf_a = true;
 
         $pdf = $this->tcpdf->create($orientation, PDF_UNIT, $pageFormat, true, 'UTF-8', false, $pdf_a);
@@ -173,61 +130,7 @@ class Manager
         $pdf->lastPage();
 
         $pdf->Output($filename, 'F');
-    }
 
-    /**
-     *
-     * @param GeneratorInterface $generator
-     */
-    public function addGenerator(GeneratorInterface $generator)
-    {
-        $this->generators[$generator->getName()] = $generator;
-    }
-
-    /**
-     *
-     * @return GeneratorInterface[]
-     */
-    public function getGenerators()
-    {
-        return $this->generators;
-    }
-
-    /**
-     *
-     * @param string $name
-     * @return GeneratorInterface
-     */
-    public function getGeneratorByName($name)
-    {
-        if ($this->hasGenerator($name)) {
-            return $this->generators[$name];
-        } else {
-            throw new \RuntimeException(sprintf('Generator >%s< is unknown', $name));
-        }
-    }
-
-    /**
-     *
-     * @param string $name
-     * @return bool
-     */
-    public function hasGenerator($name)
-    {
-        return isset($this->generators[$name]);
-    }
-
-    /**
-     * Auswahlliste für Form
-     *
-     * @return array
-     */
-    public function getVisibleGeneratorChoices()
-    {
-        $choices = [];
-        foreach ($this->getGenerators() as $generator) {
-            $choices[$generator->getName()] = $generator->getLabel();
-        }
-        return $choices;
+        return $pdf;
     }
 }
