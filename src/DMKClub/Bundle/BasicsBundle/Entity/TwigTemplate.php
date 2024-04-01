@@ -1,399 +1,115 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\BasicsBundle\Entity;
 
+use DMKClub\Bundle\BasicsBundle\Entity\Repository\TwigTemplateRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use Oro\Bundle\EntityConfigBundle\Metadata\Attribute\Config;
+use Oro\Bundle\EntityConfigBundle\Metadata\Attribute\ConfigField;
 use Oro\Bundle\OrganizationBundle\Entity\Organization;
 use Oro\Bundle\UserBundle\Entity\User;
-use Oro\Bundle\EntityConfigBundle\Metadata\Annotation\Config;
-use Oro\Bundle\EntityConfigBundle\Metadata\Annotation\ConfigField;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
-/**
- * Class TwigTemplate
- *
- * @package DMKClub\Bundle\DMKClubBasicsBundle\Entity
- * @ORM\Entity(repositoryClass="DMKClub\Bundle\BasicsBundle\Entity\Repository\TwigTemplateRepository")
- * @ORM\Table(name="dmkclub_basics_twigtemplate")
- * @ORM\HasLifecycleCallbacks()
- * @Config(
- *      routeName="dmkclub_basics_twigtemplate_index",
- *      routeView="dmkclub_basics_twigtemplate_view",
- *      defaultValues={
- *          "entity"={
- *              "icon"="fa-file"
- *          },
- *          "ownership"={
- *              "owner_type"="USER",
- *              "owner_field_name"="owner",
- *              "owner_column_name"="user_owner_id",
- *              "organization_field_name"="organization",
- *              "organization_column_name"="organization_id"
- *          },
- *          "security"={
- *              "type"="ACL",
- *              "group_name"="",
- *              "category"="dmkclub_data"
- *          },
- *          "dataaudit"={
- *              "auditable"=true
- *          }
- *      }
- * )
- */
-class TwigTemplate {
-	/**
-	 * @var int
-	 *
-	 * @ORM\Id
-	 * @ORM\Column(type="integer", name="id")
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *      }
-	 * )
-	 */
-	protected $id;
+#[ORM\Table(name: 'dmkclub_basics_twigtemplate')]
+#[ORM\Entity(repositoryClass: TwigTemplateRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[Config(
+    routeName: 'dmkclub_basics_twigtemplate_index',
+    routeView: 'dmkclub_basics_twigtemplate_view',
+    defaultValues: [
+        'entity' => ['icon' => 'fa-file'],
+        'ownership' => [
+            'owner_type' => 'USER',
+            'owner_field_name' => 'owner',
+            'owner_column_name' => 'user_owner_id',
+            'organization_field_name' => 'organization',
+            'organization_column_name' => 'organization_id',
+        ],
+        'security' => ['type' => 'ACL', 'group_name' => '', 'category' => 'dmkclub_data'],
+        'dataaudit' => ['auditable' => true],
+    ]
+)]
+class TwigTemplate implements \Stringable
+{
+    #[ORM\Id] #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ConfigField(defaultValues: [])]
+    public int $id;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="name", type="string", length=255, nullable=true)
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $name;
+    #[ORM\Column(name: 'name', type: Types::STRING, length: 255, nullable: true)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true]])]
+    public ?string $name = null;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="template", type="text")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $template;
+    #[ORM\Column(name: 'template', type: Types::TEXT)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true]])]
+    public string $template;
 
-	/**
-	 * @var string
-	 * Generatorklasse für PDF-Dateien
-	 *
-	 * @ORM\Column(name="generator", type="string", length=255, nullable=true)
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          }
-	 *      }
-	 * )
-	 */
-	private $generator;
+    #[ORM\Column(name: 'generator', type: Types::STRING, length: 255, nullable: true)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true]])]
+    public string $generator;
 
-	public function getGenerator() {
-	  return $this->generator;
-	}
+    #[ORM\Column(name: 'orientation', type: Types::STRING, length: 50, nullable: true)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true]])]
+    public string $orientation = 'P';
 
-	public function setGenerator($value) {
-	  $this->generator = $value;
-	}
+    #[ORM\Column(name: 'page_format', type: Types::TEXT)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true]])]
+    public string $pageFormat;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="orientation", type="string", length=50, nullable=true)
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          }
-	 *      }
-	 * )
-	 */
-	private $orientation = 'P';
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="page_format", type="text")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          }
-	 *      }
-	 * )
-	 */
-	private $pageFormat;
+    #[ORM\Column(name: 'created_at', type: Types::DATETIME_MUTABLE)]
+    #[ConfigField(defaultValues: ['entity' => ['label' => 'oro.ui.created_at']])]
+    public \DateTime $createdAt;
 
+    #[ORM\Column(name: 'updated_at', type: Types::DATETIME_MUTABLE)]
+    #[ConfigField(defaultValues: ['entity' => ['label' => 'oro.ui.updated_at']])]
+    public \DateTime $updatedAt;
 
-	/**
-	 * @var \DateTime $createdAt
-	 *
-	 * @ORM\Column(type="datetime", name="created_at")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "entity"={
-	 *              "label"="oro.ui.created_at"
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $createdAt;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_owner_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    public User $owner;
 
-	/**
-	 * @var \DateTime $updatedAt
-	 *
-	 * @ORM\Column(type="datetime", name="updated_at")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "entity"={
-	 *              "label"="oro.ui.updated_at"
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $updatedAt;
+    #[ORM\ManyToOne(targetEntity: Organization::class)]
+    #[ORM\JoinColumn(name: 'organization_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    public Organization $organization;
 
-	/**
-	 * @var User
-	 * @ORM\ManyToOne(targetEntity="Oro\Bundle\UserBundle\Entity\User")
-	 * @ORM\JoinColumn(name="user_owner_id", referencedColumnName="id", onDelete="SET NULL")
-	 */
-	protected $owner;
+    public function getPageFormatStructured(): string|array
+    {
+        try {
+            /** @var array $value */
+            $value = Yaml::parse($this->pageFormat);
+        } catch (ParseException $e) {
+            $value = $this->pageFormat;
+        }
 
-	/**
-	 * @var Organization
-	 *
-	 * @ORM\ManyToOne(targetEntity="Oro\Bundle\OrganizationBundle\Entity\Organization")
-	 * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="SET NULL")
-	 */
-	protected $organization;
+        return $value;
+    }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function __construct() {
-	}
+    public function setPageFormatStructured(array|string $value): void
+    {
+        if (\is_array($value)) {
+            $value = Yaml::dump($value);
+        }
+        $this->pageFormat = $value;
+    }
 
-	/**
-	 * Set id
-	 *
-	 * @param int $id
-	 * @return TwigTemplate
-	 */
-	public function setId($id) {
-		$this->id = $id;
+    #[ORM\PrePersist]
+    public function prePersist(): void
+    {
+        $this->createdAt = $this->updatedAt = new \DateTime('now', new \DateTimeZone('UTC'));
+    }
 
-		return $this;
-	}
+    #[ORM\PreUpdate]
+    public function preUpdate(): void
+    {
+        $this->updatedAt = new \DateTime('now', new \DateTimeZone('UTC'));
+    }
 
-	/**
-	 * Get id
-	 *
-	 * @return int
-	 */
-	public function getId()
-	{
-		return $this->id;
-	}
-
-	/**
-	 * Set name
-	 *
-	 * @param string $value
-	 * @return TwigTemplate
-	 */
-	public function setName($value)
-	{
-		$this->name = $value;
-
-		return $this;
-	}
-
-	/**
-	 * Get name
-	 *
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set template code
-	 *
-	 * @param string $value
-	 * @return TwigTemplate
-	 */
-	public function setTemplate($value)
-	{
-		$this->template = $value;
-
-		return $this;
-	}
-
-	/**
-	 * Get template code
-	 *
-	 * @return string
-	 */
-	public function getTemplate()
-	{
-		return $this->template;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getPageFormat() {
-		return $this->pageFormat;
-	}
-
-	/**
-	 * @return mixed either string or array
-	 */
-	public function getPageFormatStructured() {
-		try {
-			$value = Yaml::parse($this->getPageFormat());
-		}
-		catch (ParseException $e) {
-			// nothing todo
-			$value = $this->getPageFormat();
-		}
-		return $value;
-	}
-
-	/**
-	 *
-	 * @param mixed $value either string or array
-	 */
-	public function setPageFormatStructured($value) {
-		if(is_array($value)) {
-			$value = Yaml::dump($value);
-		}
-		$this->setPageFormat($value);
-	}
-	public function setPageFormat($value) {
-		$this->pageFormat = $value;
-		return $this;
-	}
-
-	public function getOrientation() {
-		return $this->orientation;
-	}
-
-	public function setOrientation($value) {
-		$this->orientation = $value;
-		return $this;
-	}
-
-	/**
-	 * @return User
-	 */
-	public function getOwner()
-	{
-	    return $this->owner;
-	}
-
-	/**
-	 * @param User $user
-	 */
-	public function setOwner(User $user)
-	{
-	    $this->owner = $user;
-	    return $this;
-	}
-
-	/**
-	 * Set organization
-	 *
-	 * @param Organization $organization
-	 * @return TwigTemplate
-	 */
-	public function setOrganization(Organization $organization = null)
-	{
-	    $this->organization = $organization;
-
-	    return $this;
-	}
-
-	/**
-	 * Get organization
-	 *
-	 * @return Organization
-	 */
-	public function getOrganization()
-	{
-	    return $this->organization;
-	}
-
-	/**
-	 * @return \DateTime
-	 */
-	public function getCreatedAt()
-	{
-	    return $this->createdAt;
-	}
-
-	/**
-	 * @param \DateTime $createdAt
-	 */
-	public function setCreatedAt(\DateTime $createdAt)
-	{
-	    $this->createdAt = $createdAt;
-	}
-
-	/**
-	 * @return \DateTime
-	 */
-	public function getUpdatedAt()
-	{
-	    return $this->updatedAt;
-	}
-
-	/**
-	 * @param \DateTime $updatedAt
-	 */
-	public function setUpdatedAt(\DateTime $updatedAt)
-	{
-	    $this->updatedAt = $updatedAt;
-	}
-	/**
-	 * Pre persist event listener
-	 *
-	 * @ORM\PrePersist
-	 */
-	public function prePersist()
-	{
-	    $this->createdAt = $this->updatedAt = new \DateTime('now', new \DateTimeZone('UTC'));
-	}
-
-	/**
-	 * Pre update event handler
-	 *
-	 * @ORM\PreUpdate
-	 */
-	public function preUpdate()
-	{
-	    $this->updatedAt = new \DateTime('now', new \DateTimeZone('UTC'));
-	}
-
-	/**
-	 * @return string
-	 */
-	public function __toString()
-	{
-	    return (string) $this->getName();
-	}
+    public function __toString()
+    {
+        return (string) $this->name;
+    }
 }
