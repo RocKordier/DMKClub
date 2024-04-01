@@ -1,40 +1,38 @@
 <?php
+
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\BasicsBundle\Form\Type;
 
+use DMKClub\Bundle\BasicsBundle\Entity\TwigTemplate;
 use Doctrine\ORM\EntityRepository;
+use Oro\Bundle\FormBundle\Form\Type\Select2EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Oro\Bundle\FormBundle\Form\Type\Select2EntityType;
 
 class TwigTemplateSelectType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(
             [
                 'autocomplete_alias' => 'dmkclub_twigtemplates',
-                'class' => 'DMKClubBasicsBundle:TwigTemplate',
+                'class' => TwigTemplate::class,
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('t')
                         ->orderBy('t.name', 'ASC');
                 },
-        		'configs'            => [
+                'configs' => [
                     'allowClear' => true,
-            		'placeholder' => 'dmkclub.form.choose'
+                    'placeholder' => 'dmkclub.form.choose',
                 ],
                 'empty_value' => '',
-                'empty_data'  => null
+                'empty_data' => null,
             ]
         );
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent()
+    public function getParent(): string
     {
         return Select2EntityType::class;
     }

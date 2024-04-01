@@ -1,56 +1,36 @@
 <?php
+
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\BasicsBundle\Form\Handler;
 
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Doctrine\Persistence\ObjectManager;
 use DMKClub\Bundle\BasicsBundle\Entity\TwigTemplate;
+use Doctrine\Persistence\ObjectManager;
+use Oro\Bundle\FormBundle\Form\Handler\FormHandlerInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 
-class TwigTemplateHandler
+readonly class TwigTemplateHandler implements FormHandlerInterface
 {
-
-    /** @var FormInterface */
-    protected $form;
-
-    /** @var RequestStack */
-    protected $request;
-
-    /** @var ObjectManager */
-    protected $manager;
+    public function __construct(
+        private ObjectManager $manager
+    ) {}
 
     /**
-     *
-     * @param FormInterface $form
-     * @param RequestStack $request
-     * @param ObjectManager $manager
+     * @param TwigTemplate $data
      */
-    public function __construct(FormInterface $form, RequestStack $request, ObjectManager $manager)
+    public function process($data, FormInterface $form, Request $request): bool
     {
-        $this->form = $form;
-        $this->request = $request;
-        $this->manager = $manager;
-    }
+        $form->setData($data);
 
-    /**
-     * Process form
-     *
-     * @param TwigTemplate $entity
-     *
-     * @return bool True on successful processing, false otherwise
-     */
-    public function process(TwigTemplate $entity)
-    {
-        $this->form->setData($entity);
-
-        $request = $this->request->getCurrentRequest();
-        if (in_array($request->getMethod(), [
+        if (\in_array($request->getMethod(), [
             'POST',
-            'PUT'
+            'PUT',
         ])) {
-            $this->form->handleRequest($request);
+            $form->handleRequest($request);
 
-            if ($this->form->isValid()) {
-                $this->onSuccess($entity);
+            if ($form->isValid()) {
+                $this->onSuccess($data);
 
                 return true;
             }
@@ -59,12 +39,7 @@ class TwigTemplateHandler
         return false;
     }
 
-    /**
-     * "Success" form handler
-     *
-     * @param TwigTemplate $entity
-     */
-    protected function onSuccess(TwigTemplate $entity)
+    protected function onSuccess(TwigTemplate $entity): void
     {
         $this->manager->persist($entity);
         $this->manager->flush();
