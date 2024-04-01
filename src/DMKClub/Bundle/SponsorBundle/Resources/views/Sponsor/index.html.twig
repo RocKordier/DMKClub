@@ -1,18 +1,16 @@
-{% extends 'OroUIBundle:actions:index.html.twig' %}
-{% import 'OroUIBundle::macros.html.twig' as UI %}
+{% extends '@OroUI/actions/index.html.twig' %}
+{% import '@OroUI/macros.html.twig' as UI %}
 
 {% set gridName = 'dmkclub-sponsors-grid' %}
 {% set pageTitle = 'dmkclub.sponsor.entity_plural_label'|trans %}
-
 
 {% block navButtons %}
     {% if is_granted('dmkclub_sponsor_create') %}
         <div class="btn-group">
             {{ UI.addButton({
-                'path' : path('dmkclub_sponsor_create'),
+                'path': path('dmkclub_sponsor_create'),
                 'entity_label': 'dmkclub.sponsor.entity_label'|trans
             }) }}
         </div>
     {% endif %}
 {% endblock %}
-    

@@ -1,10 +1,10 @@
-{% import 'OroUIBundle::macros.html.twig' as UI %}
-{% import 'OroTagBundle::macros.html.twig' as tag %}
-{% import 'OroEntityConfigBundle::macros.html.twig' as entityConfig %}
+{% import '@OroUI/macros.html.twig' as UI %}
+{% import '@OroTag/macros.html.twig' as tag %}
+{% import '@OroEntityConfig/macros.html.twig' as entityConfig %}
 
-{# 
-Detail-Infos zum Vertrag.
-Wird im ContractView verwendet
+{#
+    Detail-Infos zum Vertrag.
+    Wird im ContractView verwendet
  #}
 
 <div class="widget-content">
@@ -19,7 +19,7 @@ Wird im ContractView verwendet
             {%- endif -%}
             {{ UI.renderHtmlProperty('dmkclub.sponsor.contract.sponsor.label'|trans, sponsorView) }}
             {%- if entity.category -%}
-            	{{ UI.renderHtmlProperty('dmkclub.sponsor.contract.category.label'|trans, entity.category.name) }}
+                {{ UI.renderHtmlProperty('dmkclub.sponsor.contract.category.label'|trans, entity.category.name) }}
             {%- endif -%}
             {{ UI.renderProperty('dmkclub.sponsor.contract.shipping_way.label'|trans, entity.shippingWay ? entity.shippingWay.name : '-') }}
 

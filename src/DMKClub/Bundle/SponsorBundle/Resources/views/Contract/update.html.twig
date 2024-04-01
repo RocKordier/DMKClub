@@ -1,16 +1,17 @@
-{% extends 'OroUIBundle:actions:update.html.twig' %}
-{% import 'OroUIBundle::macros.html.twig' as UI %}
-{% form_theme form with ['OroFormBundle:Form:fields.html.twig', 'OroTagBundle:Form:fields.html.twig'] %}
+{% extends '@OroUI/actions/update.html.twig' %}
+{% import '@OroUI/macros.html.twig' as UI %}
+
+{% form_theme form with ['@OroForm/Form/fields.html.twig', '@OroTag/Form/fields.html.twig'] %}
 
 {% set fullname = entity.name|default('N/A') %}
 {# set fullname = entity|oro_format_name|default('N/A') #}
-{% oro_title_set({ params : {"%contract.name%": fullname} }) %}
+{% oro_title_set ({params: {"%contract.name%": fullname}}) %}
 
 {% set routeSuffix = sponsor is defined ? '_by_sponsor' : '' %}
 
-{% set formAction = form.vars.value.id ? 
-        path('dmkclub_sponsor_contract_update', { 'id': form.vars.value.id }) : 
-        path('dmkclub_sponsor_contract_create' ~ routeSuffix, sponsor is defined ? { 'sponsorId': sponsor.id } : {})
+{% set formAction = form.vars.value.id ?
+        path('dmkclub_sponsor_contract_update', {'id': form.vars.value.id}) :
+        path('dmkclub_sponsor_contract_create' ~ routeSuffix, sponsor is defined ? {'sponsorId': sponsor.id} : {})
 %}
 
 {% block head_script %}
@@ -26,11 +27,11 @@
         {{ UI.buttonSeparator() }}
     {% endif %}
     {% if form.vars.value.id %}
-	    {{ UI.cancelButton(path('dmkclub_sponsor_contract_view', { 'id': form.vars.value.id })) }}
+        {{ UI.cancelButton(path('dmkclub_sponsor_contract_view', {'id': form.vars.value.id})) }}
     {% else %}
-	    {{ UI.cancelButton(path('dmkclub_sponsor_contract_index')) }}
+        {{ UI.cancelButton(path('dmkclub_sponsor_contract_index')) }}
     {% endif %}
-	{% set html = UI.saveAndCloseButton({
+    {% set html = UI.saveAndCloseButton({
         'route': 'dmkclub_sponsor_contract_view',
         'params': {'id': '$id'}
     }) %}
@@ -46,18 +47,17 @@
 {% block pageHeader %}
     {% if form.vars.value.id %}
         {% set breadcrumbs = {
-            'entity':      form.vars.value,
-            'indexPath':   path('dmkclub_sponsor_contract_index'),
+            'entity': form.vars.value,
+            'indexPath': path('dmkclub_sponsor_contract_index'),
             'indexLabel': 'dmkclub.sponsor.contract.entity_plural_label'|trans,
             'entityTitle': entity.name
         } %}
         {{ parent() }}
     {% else %}
         {% set title = 'oro.ui.create_entity'|trans({'%entityName%': 'dmkclub.sponsor.contract.entity_label'|trans}) %}
-        {% include 'OroUIBundle::page_title_block.html.twig' with { title: title } %}
+        {% include 'OroUIBundle::page_title_block.html.twig' with {title: title} %}
     {% endif %}
 {% endblock pageHeader %}
-
 
 {% block breadcrumbs %}
     {{ parent() }}
@@ -80,7 +80,6 @@
     {% if form.owner is defined %}
         {% set formFields = formFields|merge([form_row(form.owner)]) %}
     {% endif %}
-
 
     {% set dataBlocks = [{
             'title': 'General'|trans,
@@ -105,14 +104,14 @@
             'subblocks': [{
                 'title': '',
                 'useSpan': false,
-                'data' : additionalData
+                'data': additionalData
             }]
-        }] ) %}
+        }]) %}
     {% endif %}
 
     {% set data =
         {
-            'formErrors': form_errors(form)? form_errors(form) : null,
+            'formErrors': form_errors(form) ? form_errors(form) : null,
             'dataBlocks': dataBlocks,
         }
     %}

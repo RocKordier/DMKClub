@@ -1,21 +1,20 @@
-{% import 'OroUIBundle::macros.html.twig' as UI %}
-{% import 'OroAddressBundle::macros.html.twig' as address %}
-{# 
-Einzeltemplate für einen Sponsor.
-Wird im Account verwendet
- #}
+{% import '@OroUI/macros.html.twig' as UI %}
+{% import '@OroAddress/macros.html.twig' as address %}
 
-
+{#
+    Einzeltemplate für einen Sponsor.
+    Wird im Account verwendet
+#}
 
 <div class="widget-content row-fluid ">
     <div class="responsive-cell form-horizontal">
-    	{% set sponsor_name_link %}
-            <a href="{{ path('dmkclub_sponsor_view', {'id':sponsor.id}) }}">
+        {% set sponsor_name_link %}
+            <a href="{{ path('dmkclub_sponsor_view', {'id': sponsor.id}) }}">
                 {{ sponsor.name|escape }}
             </a>
         {% endset %}
         {{ UI.renderHtmlProperty('dmkclub.sponsor.name.label'|trans, sponsor_name_link) }}
-        
+
         {%- if is_granted('oro_contact_view') and sponsor.contact -%}
             {% set contactView = '<a href="' ~ path('oro_contact_view', {'id': sponsor.contact.id}) ~ '">' ~ sponsor.contact|oro_format_name|escape ~ '</a>' %}
         {%- else -%}
@@ -25,10 +24,9 @@ Wird im Account verwendet
         {{ UI.renderHtmlProperty('dmkclub.sponsor.contact.label'|trans, contactView) }}
 
         {%- if sponsor.category -%}
-        	{{ UI.renderHtmlProperty('dmkclub.sponsor.category.entity_label'|trans, sponsor.category.name) }}
+            {{ UI.renderHtmlProperty('dmkclub.sponsor.category.entity_label'|trans, sponsor.category.name) }}
         {%- endif -%}
 
         {{ UI.renderHtmlProperty('dmkclub.sponsor.billing_address.label'|trans, address.renderAddress(sponsor.billingAddress)) }}
     </div>
-
 </div>

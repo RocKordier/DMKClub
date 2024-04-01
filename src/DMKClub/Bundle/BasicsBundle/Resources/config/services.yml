@@ -31,9 +31,9 @@ services:
         tags:
             - { name: oro_datagrid.extension.mass_action.type, type: dmkdownloadpdf }
 
-######
-### Actions
-######
+# ###
+# Datagrid Actions
+# ###
     DMKClub\Bundle\BasicsBundle\DataGrid\Extension\Action\GetPdfAction:
         shared: false
         tags:
