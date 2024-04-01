@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DMKClub\Bundle\BasicsBundle\Entity\Repository;
+namespace DMKClub\Bundle\BasicsBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
