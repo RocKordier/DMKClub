@@ -3,7 +3,7 @@ datagrids:
 # MemberBilling base grid
 # ###
     dmkclub-basics-twigtemplate-grid:
-        extended_entity_name: "%dmkclub_basics.twigtemplate.entity.class%"
+        extended_entity_name: DMKClub\Bundle\BasicsBundle\Entity\Template
         acl_resource: dmkclub_basics_twigtemplate_view
         source:
             type: orm
@@ -14,7 +14,7 @@ datagrids:
                     - t.createdAt
                     - t.updatedAt
                 from:
-                    - { table: "%dmkclub_basics.twigtemplate.entity.class%", alias: t }
+                    - { table: DMKClub\Bundle\BasicsBundle\Entity\Template, alias: t }
         columns:
             name:
                 label:         dmkclub.basics.twigtemplate.name.label
@@ -57,7 +57,7 @@ datagrids:
                     data_name: t.updatedAt
                     enabled: false
             default:
-                status: { value: 'active', type: Oro\Bundle\FilterBundle\Form\Type\TextFilterType::TYPE_EQUAL } 
+                status: { value: 'active', type: Oro\Bundle\FilterBundle\Form\Type\TextFilterType::TYPE_EQUAL }
         actions:
             view:
                 type: navigate

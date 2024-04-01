@@ -22,6 +22,7 @@
     ],
     "require": {
         "php": "^8.3",
+        "ext-mbstring": "*",
         "digitick/sepa-xml": "^2.2",
         "ehdev/oro-basics-bundle": "6.0.x-dev",
         "qipsius/tcpdf-bundle": "^3.0",
@@ -36,7 +37,8 @@
         "phpstan/phpstan": "^1.10",
         "phpstan/phpstan-doctrine": "^1.3",
         "phpstan/phpstan-phpunit": "^1.3",
-        "phpunit/phpunit": "^9.5.0"
+        "phpunit/phpunit": "^9.5.0",
+        "vincentlanglet/twig-cs-fixer": "^2.6"
     },
     "config": {
         "sort-packages": true,

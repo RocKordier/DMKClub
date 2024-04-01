@@ -1,46 +1,40 @@
-parameters:
-    dmkclub_basics.twigtemplate.entity.class:    DMKClub\Bundle\BasicsBundle\Entity\TwigTemplate
-#    dmkclub_basics.twigtemplate.manager.class:   DMKClub\Bundle\BasicsBundle\Entity\Manager\TwigTemplateManager
-    dmkclub_basics.utility.datagrids.class:      DMKClub\Bundle\BasicsBundle\Utility\Datagrids
-
 services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    DMKClub\Bundle\BasicsBundle\:
+        resource: '../../'
+        exclude: '../../{DMKClubBasicsBundle.php,Entity,Migrations,DependencyInjection}'
+
+    DMKClub\Bundle\BasicsBundle\Controller\:
+        public: true
+        resource: '../../Controller'
+        tags: ['controller.service_arguments']
+
     Qipsius\TCPDFBundle\Controller\TCPDFController: '@qipsius.tcpdf'
 
-    dmkclub_basics.pdf.file_manager:
-        class: 'DMKClub\Bundle\BasicsBundle\PDF\FileManager'
-        arguments:
-          - '@knp_gaufrette.filesystem_map'
-          - 'dmkclub_pdfexport'
-
-    DMKClub\Bundle\BasicsBundle\PDF\Manager:
+    DMKClub\Bundle\BasicsBundle\Utility\Datagrids:
         public: true
-        arguments:
-            - "@qipsius.tcpdf"
-            - "@twig"
-            - "@oro_importexport.file.file_manager"
-            - '@oro_importexport.file_manager'
-            - "@logger"
 
-    dmkclub_basics.utility.datagrids:
-        class: "%dmkclub_basics.utility.datagrids.class%"
+    DMKClub\Bundle\BasicsBundle\DataGrid\Extension\MassAction\DownloadPdfHandler:
         public: true
-### Job Services
-    dmkclub_basics.async.pdf.exportpdfsprocessor:
-        class: 'DMKClub\Bundle\BasicsBundle\Async\Pdf\ExportPdfsMessageProcessor'
-        arguments:
-            - "@oro_message_queue.message_producer"
-            - '@oro_message_queue.job.runner'
-            - "@logger"
-        tags:
-            - { name: 'oro_message_queue.client.message_processor' }
 
-    dmkclub_basics.async.pdf.exportpdfprocessor:
-        class: 'DMKClub\Bundle\BasicsBundle\Async\Pdf\ExportPdfProcessor'
-        arguments:
-            - '@oro_message_queue.job.runner'
-            - "@doctrine.orm.entity_manager"
-            - '@DMKClub\Bundle\BasicsBundle\PDF\Manager'
-            - "@knp_gaufrette.filesystem_map"
-            - "@logger"
+    DMKClub\Bundle\BasicsBundle\DataGrid\Extension\MassAction\ExportPdfAction:
+        shared: false
         tags:
-            - { name: 'oro_message_queue.client.message_processor' }
+            - { name: oro_datagrid.extension.mass_action.type, type: dmkexportpdf }
+
+    DMKClub\Bundle\BasicsBundle\DataGrid\Extension\MassAction\DownloadPdfAction:
+        shared: false
+        tags:
+            - { name: oro_datagrid.extension.mass_action.type, type: dmkdownloadpdf }
+
+######
+### Actions
+######
+    DMKClub\Bundle\BasicsBundle\DataGrid\Extension\Action\GetPdfAction:
+        shared: false
+        tags:
+            - { name: oro_datagrid.extension.action.type, type: dmkgetpdf }

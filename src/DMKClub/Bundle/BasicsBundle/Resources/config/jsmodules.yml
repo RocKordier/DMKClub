@@ -3,14 +3,12 @@ aliases:
    oro/datagrid/action/dmkexportpdf-mass-action$: dmkclubbasics/js/datagrid/action/dmkexportpdf-mass-action
    oro/datagrid/action/dmkdownloadpdf-mass-action$: dmkclubbasics/js/datagrid/action/dmkdownloadpdf-mass-action
 
-
 dynamic-imports:
    dmkclubbasics:
       - oro/datagrid/action/dmkgetpdf-action
       - oro/datagrid/action/dmkexportpdf-mass-action
       - oro/datagrid/action/dmkdownloadpdf-mass-action
       - dmkclubbasics/js/app/views/editor/cent-editor-view
-
 
 #config:
 #    paths:

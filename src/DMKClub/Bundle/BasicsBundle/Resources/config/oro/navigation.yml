@@ -7,7 +7,7 @@ navigation:
                 extras:
                     routes: ['dmkclub_basics_twigtemplate_*']
                     description: 'dmkclub.basics.menu.twigtemplate_list.description'
-    
+
         tree:
             application_menu:
                 children:

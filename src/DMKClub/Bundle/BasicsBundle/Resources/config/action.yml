@@ -1,7 +1,0 @@
-services:
-    dmkclub_basics.datagrid.action.dmkgetpdf:
-        class: DMKClub\Bundle\BasicsBundle\DataGrid\Extension\Action\GetPdfAction
-        shared: false
-        tags:
-            - { name: oro_datagrid.extension.action.type, type: dmkgetpdf }
-

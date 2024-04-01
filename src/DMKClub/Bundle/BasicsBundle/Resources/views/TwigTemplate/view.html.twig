@@ -1,15 +1,15 @@
-{% extends 'OroUIBundle:actions:view.html.twig' %}
-{% import 'OroUIBundle::macros.html.twig' as UI %}
-{% import 'OroDataGridBundle::macros.html.twig' as dataGrid %}
+{% extends '@OroUI/actions/view.html.twig' %}
+{% import '@OroUI/macros.html.twig' as UI %}
+{% import '@OroDataGrid/macros.html.twig' as dataGrid %}
 
 {% set fullname = entity.name %}
-{% oro_title_set({params : {"%template.name%": fullname} }) %}
+{% oro_title_set ({params: {"%template.name%": fullname}}) %}
 
 {% block navButtons %}
     {{ UI.cancelButton(path('dmkclub_basics_twigtemplate_index')) }}
     {% if is_granted('EDIT', entity) %}
         {{ UI.editButton({
-            'path' : path('dmkclub_basics_twigtemplate_update', { 'id': entity.id }),
+            'path': path('dmkclub_basics_twigtemplate_update', {'id': entity.id}),
             'entity_label': 'dmkclub.basics.twigtemplate.entity_label'|trans
         }) }}
     {% endif %}
@@ -25,11 +25,10 @@
     {{ parent() }}
 {% endblock pageHeader %}
 
-
 {% block content_data %}
     {% set infoWidget %}
         <div class="responsive-cell">
-						{{ UI.renderProperty('dmkclub.basics.twigtemplate.name.label'|trans, entity.name) }}
+                        {{ UI.renderProperty('dmkclub.basics.twigtemplate.name.label'|trans, entity.name) }}
         </div>
     {% endset %}
 
@@ -38,11 +37,7 @@
             'title': 'General Information'|trans,
             'class': 'active',
             'subblocks': [
-		            {
-		            	'data' : [
-		            		infoWidget
-		            	]
-								}
+                {'data': [infoWidget]}
             ]
         }
     ] %}
