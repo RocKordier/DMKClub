@@ -1,6 +1,6 @@
 datagrids:
     dmkclub-sponsor-contracts-grid-base:
-        extended_entity_name: "%dmkclub.sponsor.contract.entity.class%"
+        extended_entity_name: DMKClub\Bundle\SponsorBundle\Entity\Contract
         acl_resource: dmkclub_sponsor_contract_view
         source:
             type: orm
@@ -16,7 +16,7 @@ datagrids:
                     - c.createdAt
                     - c.updatedAt
                 from:
-                    - { table: "%dmkclub.sponsor.contract.entity.class%", alias: c }
+                    - { table: DMKClub\Bundle\SponsorBundle\Entity\Contract, alias: c }
                 join:
                     left:
                         - { join: c.category, alias: cat }
@@ -168,4 +168,3 @@ datagrids:
                         - c.sponsor = :sponsor
             bind_parameters:
                 - sponsor
-                        

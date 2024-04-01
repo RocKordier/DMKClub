@@ -1,6 +1,6 @@
 datagrids:
     dmkclub-sponsors-grid:
-        extended_entity_name: "%dmkclub.sponsor.entity.class%"
+        extended_entity_name: DMKClub\Bundle\SponsorBundle\Entity\Sponsor
         acl_resource: dmkclub_sponsor_view
         source:
             type: orm
@@ -14,7 +14,7 @@ datagrids:
                     - s.createdAt
                     - s.updatedAt
                 from:
-                    - { table: "%dmkclub.sponsor.entity.class%", alias: s }
+                    - { table: DMKClub\Bundle\SponsorBundle\Entity\Sponsor, alias: s }
                 join:
                     left:
                         - { join: s.contact, alias: c }
@@ -112,7 +112,7 @@ datagrids:
                 icon: trash
                 link: delete_link
     dmkclub-sponsorcategories-select-grid:
-        extended_entity_name: "%dmkclub.sponsorcategory.entity.class%"
+        extended_entity_name: DMKClub\Bundle\SponsorBundle\Entity\Category
         acl_resource: dmkclub_sponsor_view
         source:
             type: orm
@@ -123,7 +123,7 @@ datagrids:
                     - c.createdAt
                     - c.updatedAt
                 from:
-                    - { table: "%dmkclub.sponsorcategory.entity.class%", alias: c }
+                    - { table: DMKClub\Bundle\SponsorBundle\Entity\Category, alias: c }
         columns:
             name:
                 label:         dmkclub.sponsor.name.label
