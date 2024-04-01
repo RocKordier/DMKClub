@@ -1,4 +1,4 @@
-{% import 'OroUIBundle::macros.html.twig' as UI %}
+{% import '@OroUI/macros.html.twig' as UI %}
 {#
     Available variables:
     * entity       - user entity DMKClub\Bundle\MemberBundle\Entity\Member or null
@@ -18,8 +18,8 @@
     {'title': 'dmkclub.member.start_date.label'|trans, 'value': entity.startDate ? entity.startDate|oro_format_date : 'N/A'},
 ] %}
 {%- if entity.endDate -%}
-	{% set entityInfo = entityInfo|merge([ 
-	    {'title': 'dmkclub.member.end_date.label'|trans, 
+	{% set entityInfo = entityInfo|merge([
+	    {'title': 'dmkclub.member.end_date.label'|trans,
 	    'value': entity.endDate ? entity.endDate|oro_format_date : 'N/A'} ])
 	%}
 {% endif %}

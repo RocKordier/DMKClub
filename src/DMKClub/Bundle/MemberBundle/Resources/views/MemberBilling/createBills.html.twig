@@ -1,5 +1,5 @@
 {% form_theme form with ['OroContactBundle:Include:fields.html.twig', 'OroFormBundle:Form:fields.html.twig', _self] %}
-{% import 'OroUIBundle::macros.html.twig' as UI %}
+{% import '@OroUI/macros.html.twig' as UI %}
 <div class="widget-content">
 
     {% if saved %}
@@ -29,14 +29,14 @@
             <fieldset class="form-horizontal">
                 {% set id = 'create-bills' %}
                 {{ form_row(form._token) }}
-            
+
                 {% set formFields = [] %}
-            
+
                 {% set formFields = formFields|merge([
                     form_row(form.billDate, { 'id': 'billdate' }),
                     form_row(form.dueDate, { 'id': 'duedate' }),
                 ]) %}
-            
+
                 {% set dataBlocks = [{
                     'title': 'General'|trans,
                     'class': 'active',
@@ -45,7 +45,7 @@
                         'data': formFields
                     }]
                 }] %}
-            
+
                 {% set data = {
                     'formErrors': form_errors(form)? form_errors(form) : null,
                     'dataBlocks': dataBlocks,

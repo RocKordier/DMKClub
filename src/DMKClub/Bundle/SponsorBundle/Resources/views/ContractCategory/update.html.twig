@@ -39,7 +39,7 @@
         {{ parent() }}
     {% else %}
         {% set title = 'oro.ui.create_entity'|trans({'%entityName%': 'dmkclub.sponsor.contractcategory.entity_label'|trans}) %}
-        {% include 'OroUIBundle::page_title_block.html.twig' with {title: title} %}
+        {% include '@OroUI/page_title_block.html.twig' with {title: title} %}
     {% endif %}
 {% endblock pageHeader %}
 
