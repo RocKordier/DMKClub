@@ -1,455 +1,125 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\SponsorBundle\Entity;
 
-use Doctrine\Common\Collections\Collection;
+use DMKClub\Bundle\SponsorBundle\Repository\ContractRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use EHDev\BasicsBundle\Entity\Traits\LifecycleTrait;
+use Oro\Bundle\EntityConfigBundle\Metadata\Attribute\Config;
+use Oro\Bundle\EntityConfigBundle\Metadata\Attribute\ConfigField;
+use Oro\Bundle\EntityExtendBundle\Entity\ExtendEntityInterface;
+use Oro\Bundle\EntityExtendBundle\Entity\ExtendEntityTrait;
 use Oro\Bundle\OrganizationBundle\Entity\Organization;
 use Oro\Bundle\UserBundle\Entity\User;
-use Oro\Bundle\EntityConfigBundle\Metadata\Annotation\Config;
-use Oro\Bundle\EntityConfigBundle\Metadata\Annotation\ConfigField;
-
-use DateTime;
-
-use DMKClub\Bundle\SponsorBundle\Model\ExtendContract;
-use DMKClub\Bundle\BasicsBundle\Model\LifecycleTrait;
+use Oro\DBAL\Types\MoneyType;
 
 /**
- * Class Sponsor Contract
- *
- * @package DMKClub\Bundle\DMKClubSponsorBundle\Entity
- *
- * @ORM\Entity(repositoryClass="DMKClub\Bundle\SponsorBundle\Entity\Repository\ContractRepository")
- * @ORM\Table(name="dmkclub_sponsor_contract")
- * @ORM\HasLifecycleCallbacks()
- * @Config(
- *      routeName="dmkclub_sponsorcontract_index",
- *      routeView="dmkclub_sponsorcontract_view",
- *      defaultValues={
- *          "entity"={
- *              "icon"="fa-file-signature"
- *          },
- *          "ownership"={
- *              "owner_type"="USER",
- *              "owner_field_name"="owner",
- *              "owner_column_name"="user_owner_id",
- *              "organization_field_name"="organization",
- *              "organization_column_name"="organization_id"
- *          },
- *          "security"={
- *              "type"="ACL",
- *              "group_name"="",
- *              "category"="dmkclub_data"
- *          },
- *          "form"={
- *              "form_type"="dmkclub_sponsorcontract_select",
- *              "grid_name"="dmkclub-sponsorcontracts-select-grid"
- *          },
- *          "tag"={
- *              "enabled"=true
- *          },
- *          "dataaudit"={
- *              "auditable"=true
- *          }
- *      }
- * )
- * Die Angaben in "form" dienen dem create_select_form_inline
+ * @method \Oro\Bundle\EntityExtendBundle\Entity\AbstractEnumValue getShippingWay()
+ * @method self                                                    setShippingWay(\Oro\Bundle\EntityExtendBundle\Entity\AbstractEnumValue $status)
  */
-class Contract extends ExtendContract
+#[ORM\Table(name: 'dmkclub_sponsor_contract')]
+#[ORM\Entity(repositoryClass: ContractRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[Config(
+    routeName: 'dmkclub_sponsorcontract_index',
+    routeView: 'dmkclub_sponsorcontract_view',
+    defaultValues: [
+        'entity' => ['icon' => 'fa-file-signature'],
+        'ownership' => [
+            'owner_type' => 'USER',
+            'owner_field_name' => 'owner',
+            'owner_column_name' => 'user_owner_id',
+            'organization_field_name' => 'organization',
+            'organization_column_name' => 'organization_id',
+        ],
+        'security' => [
+            'type' => 'ACL',
+            'group_name' => '',
+            'category' => 'dmkclub_data',
+        ],
+        'form' => [
+            'grid_name' => 'dmkclub-sponsorcontracts-select-grid',
+        ],
+        'tag' => ['enabled' => true],
+        'dataaudit' => ['auditable' => true],
+    ]
+)]
+class Contract implements \Stringable, ExtendEntityInterface
 {
+    use ExtendEntityTrait;
     use LifecycleTrait;
 
-	/**
-	 * @var int
-	 *
-	 * @ORM\Id
-	 * @ORM\Column(type="integer", name="id")
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "importexport"={
-	 *              "order"=10
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $id;
+    #[ORM\Id] #[ORM\GeneratedValue]
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ConfigField(defaultValues: ['importexport' => ['order' => 10]])]
+    public int $id;
 
+    #[ORM\Column(name: 'name', type: Types::STRING, length: 255)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true], 'importexport' => ['identity' => true, 'order' => 30]])]
+    public string $name;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="name", type="string", length=255)
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          },
-	 *          "importexport"={
-	 *              "identity"=true,
-	 *              "order"=30
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $name;
+    #[ORM\Column(name: 'begin_date', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true, 'immutable' => true], 'importexport' => ['order' => 20]])]
+    public ?\DateTime $beginDate = null;
 
-	/**
-	 * @var \DateTime
-	 *
-	 * @ORM\Column(name="begin_date", type="date", nullable=true)
-	 * @ConfigField(
-	 *  defaultValues={
-	 *      "dataaudit"={"auditable"=true, "immutable"=true},
-	 *      "importexport"={
-	 *          "order"=20
-	 *      }
-	 *  }
-	 * )
-	 */
-	protected $beginDate;
+    #[ORM\Column(name: 'end_date', type: Types::DATE_MUTABLE, nullable: true)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true, 'immutable' => true], 'importexport' => ['order' => 20]])]
+    public ?\DateTime $endDate = null;
 
-	/**
-	 * @var \DateTime
-	 *
-	 * @ORM\Column(name="end_date", type="date", nullable=true)
-	 * @ConfigField(
-	 *  defaultValues={
-	 *      "dataaudit"={"auditable"=true, "immutable"=true},
-	 *      "importexport"={
-	 *          "order"=20
-	 *      }
-	 *  }
-	 * )
-	 */
-	protected $endDate;
+    #[ORM\Column(name: 'is_active', type: Types::BOOLEAN)]
+    public bool $isActive = false;
 
-	/**
-	 * @var boolean
-	 *
-	 * @ORM\Column(type="boolean", name="is_active")
-	 */
-	protected $isActive = false;
+    #[ORM\Column(name: 'total_amount', type: MoneyType::TYPE, nullable: true)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true], 'importexport' => ['full' => true, 'order' => 15]])]
+    public ?float $totalAmount = 0;
 
-	/**
-	 * @var double
-	 *
-	 * @ORM\Column(name="total_amount", type="money", nullable=true)
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          },
-	 *          "importexport"={
-	 *              "full"=true,
-	 *              "order"=15
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $totalAmount = 0;
+    #[ORM\ManyToOne(targetEntity: Sponsor::class, inversedBy: 'contracts')]
+    #[ORM\JoinColumn(name: 'sponsor', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => false]])]
+    public Sponsor $sponsor;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="\DMKClub\Bundle\SponsorBundle\Entity\Sponsor", inversedBy="contracts")
-	 * @ORM\JoinColumn(name="sponsor", referencedColumnName="id", onDelete="CASCADE")
-	 * @ConfigField(defaultValues={"dataaudit"={"auditable"=false}})
-	 */
-	protected $sponsor;
+    #[ORM\ManyToOne(targetEntity: ContractCategory::class)]
+    #[ORM\JoinColumn(name: 'category', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true], 'importexport' => ['order' => 230, 'short' => true]])]
+    public ?Category $category = null;
 
-	/**
-	 * @var Collection
-	 *
-	 * @ORM\ManyToOne(targetEntity="DMKClub\Bundle\SponsorBundle\Entity\ContractCategory")
-	 * @ORM\JoinColumn(name="category", referencedColumnName="id", onDelete="SET NULL")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          },
-	 *          "importexport"={
-	 *              "order"=230,
-	 *              "short"=true
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $category;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_owner_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    public ?User $owner = null;
 
-	/**
-	 * @var User
-	 * @ORM\ManyToOne(targetEntity="Oro\Bundle\UserBundle\Entity\User")
-	 * @ORM\JoinColumn(name="user_owner_id", referencedColumnName="id", onDelete="SET NULL")
-	 */
-	protected $owner;
+    #[ORM\ManyToOne(targetEntity: Organization::class)]
+    #[ORM\JoinColumn(name: 'organization_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    public ?Organization $organization = null;
 
-	/**
-	 * @var Organization
-	 *
-	 * @ORM\ManyToOne(targetEntity="Oro\Bundle\OrganizationBundle\Entity\Organization")
-	 * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="SET NULL")
-	 */
-	protected $organization;
+    public function __toString()
+    {
+        return $this->name;
+    }
 
+    #[ORM\PrePersist]
+    public function prePersist2(): void
+    {
+        $this->isActive = $this->calcIsActive(new \DateTime('now', new \DateTimeZone('UTC')));
+    }
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function __construct()
-	{
-		parent::__construct();
+    #[ORM\PreUpdate]
+    public function preUpdate2(): void
+    {
+        $this->isActive = $this->calcIsActive(new \DateTime('now', new \DateTimeZone('UTC')));
+    }
 
-	}
+    private function calcIsActive(\DateTime $now): bool
+    {
+        if ($now < $this->beginDate) {
+            return false;
+        }
+        if (null !== $this->endDate && $now > $this->endDate) {
+            return false;
+        }
 
-	/**
-	 * Set id
-	 *
-	 * @param int $id
-	 * @return Category
-	 */
-	public function setId($id)
-	{
-		$this->id = $id;
-
-		return $this;
-	}
-
-	/**
-	 * Get id
-	 *
-	 * @return int
-	 */
-	public function getId()
-	{
-		return $this->id;
-	}
-
-	/**
-	 * Set sponsor name
-	 *
-	 * @param \DateTime $endDate
-	 * @return Category
-	 */
-	public function setName($id)
-	{
-		$this->name = $id;
-
-		return $this;
-	}
-
-	/**
-	 * Get sponsor name
-	 *
-	 * @return string
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	/**
-	 * Set begin date
-	 *
-	 * @param \DateTime $date
-	 * @return Contract
-	 */
-	public function setBeginDate(DateTime $date)
-	{
-	    $this->beginDate = $date;
-
-	    return $this;
-	}
-
-	/**
-	 * Get begin date
-	 *
-	 * @return DateTime
-	 */
-	public function getBeginDate(): ?DateTime
-	{
-	    return $this->beginDate;
-	}
-
-	/**
-	 * Set endDate
-	 *
-	 * @param \DateTime $date
-	 * @return Contract
-	 */
-	public function setEndDate(DateTime $date)
-	{
-	    $this->endDate = $date;
-
-	    return $this;
-	}
-
-	/**
-	 * Get id
-	 *
-	 * @return DateTime
-	 */
-	public function getEndDate(): ?DateTime
-	{
-	    return $this->endDate;
-	}
-
-	/**
-	 * @param bool $isActive
-	 *
-	 * @return Sponsor
-	 */
-	public function setIsActive($isActive)
-	{
-	    $this->isActive = $isActive;
-
-	    return $this;
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function isActive(): bool
-	{
-	    return (bool) $this->isActive;
-	}
-
-	/**
-	 * Set sponsor name
-	 *
-	 * @param double $amount
-	 * @return Category
-	 */
-	public function setTotalAmount($amount)
-	{
-	    $this->totalAmount = $amount;
-
-	    return $this;
-	}
-
-	/**
-	 * Get total amount
-	 *
-	 * @return double
-	 */
-	public function getTotalAmount()
-	{
-	    return $this->totalAmount;
-	}
-
-	/**
-	 * Gets the Category related to sponsor
-	 *
-	 * @return Category
-	 */
-	public function getCategory()
-	{
-	    return $this->category;
-	}
-
-	/**
-	 * Add specified Category
-	 *
-	 * @param Category $group
-	 *
-	 * @return Sponsor
-	 */
-	public function setCategory(ContractCategory $category)
-	{
-	    $this->category = $category;
-	    return $this;
-	}
-
-	/**
-	 * @return User
-	 */
-	public function getSponsor()
-	{
-	    return $this->sponsor;
-	}
-
-	/**
-	 * @param User $user
-	 */
-	public function setSponsor(Sponsor $sponsor)
-	{
-	    $this->sponsor = $sponsor;
-	}
-
-	/**
-	 * @return User
-	 */
-	public function getOwner()
-	{
-		return $this->owner;
-	}
-
-	/**
-	 * @param User $user
-	 */
-	public function setOwner(User $user)
-	{
-		$this->owner = $user;
-	}
-
-	/**
-	 * Set organization
-	 *
-	 * @param Organization $organization
-	 * @return Category
-	 */
-	public function setOrganization(Organization $organization = null)
-	{
-		$this->organization = $organization;
-
-		return $this;
-	}
-
-	/**
-	 * Get organization
-	 *
-	 * @return Organization
-	 */
-	public function getOrganization()
-	{
-		return $this->organization;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function __toString()
-	{
-	    return (string) $this->getName();
-	}
-
-	/**
-	 * Pre persist event listener
-	 *
-	 * @ORM\PrePersist
-	 */
-	public function prePersist2()
-	{
-	    $this->isActive = $this->calcIsActive(new \DateTime('now', new \DateTimeZone('UTC')));
-	}
-
-	/**
-	 * Pre update event handler
-	 *
-	 * @ORM\PreUpdate
-	 */
-	public function preUpdate2()
-	{
-	    $this->isActive = $this->calcIsActive(new \DateTime('now', new \DateTimeZone('UTC')));
-	}
-
-	private function calcIsActive(DateTime $now)
-	{
-	    if ($now < $this->beginDate) {
-	        return false;
-	    }
-	    if ($this->endDate !== null && $now > $this->endDate) {
-	        return false;
-	    }
-	    return true;
-	}
+        return true;
+    }
 }

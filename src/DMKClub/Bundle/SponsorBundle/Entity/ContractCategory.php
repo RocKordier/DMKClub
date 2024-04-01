@@ -1,212 +1,72 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\SponsorBundle\Entity;
 
+use DMKClub\Bundle\SponsorBundle\Form\Type\ContractCategorySelectType;
+use DMKClub\Bundle\SponsorBundle\Repository\ContractCategoryRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-
+use EHDev\BasicsBundle\Entity\Traits\LifecycleTrait;
+use Oro\Bundle\EntityConfigBundle\Metadata\Attribute\Config;
+use Oro\Bundle\EntityConfigBundle\Metadata\Attribute\ConfigField;
+use Oro\Bundle\EntityExtendBundle\Entity\ExtendEntityInterface;
+use Oro\Bundle\EntityExtendBundle\Entity\ExtendEntityTrait;
 use Oro\Bundle\OrganizationBundle\Entity\Organization;
 use Oro\Bundle\UserBundle\Entity\User;
-use Oro\Bundle\EntityConfigBundle\Metadata\Annotation\Config;
-use Oro\Bundle\EntityConfigBundle\Metadata\Annotation\ConfigField;
 
-use DMKClub\Bundle\SponsorBundle\Model\ExtendContractCategory;
-use DMKClub\Bundle\BasicsBundle\Model\LifecycleTrait;
-
-/**
- * Class Contract Category
- *
- * @package DMKClub\Bundle\DMKClubSponsorBundle\Entity
- *
- * @ORM\Entity(repositoryClass="DMKClub\Bundle\SponsorBundle\Entity\Repository\ContractCategoryRepository")
- * @ORM\Table(name="dmkclub_sponsor_contractcategory")
- * @ORM\HasLifecycleCallbacks()
- * @Config(
- *      routeName="dmkclub_contractcategory_index",
- *      routeView="dmkclub_contractcategory_view",
- *      defaultValues={
- *          "entity"={
- *              "icon"="fa-gear"
- *          },
- *          "ownership"={
- *              "owner_type"="USER",
- *              "owner_field_name"="owner",
- *              "owner_column_name"="user_owner_id",
- *              "organization_field_name"="organization",
- *              "organization_column_name"="organization_id"
- *          },
- *          "security"={
- *              "type"="ACL",
- *              "group_name"="",
- *              "category"="dmkclub_data"
- *          },
- *          "form"={
- *              "form_type"="dmkclub_sponsor_contractcategory_select",
- *              "grid_name"="dmkclub-sponsor-contractcategories-select-grid"
- *          },
- *          "dataaudit"={
- *              "auditable"=true
- *          }
- *      }
- * )
- * Die Angaben in "form" dienen dem create_select_form_inline
- */
-class ContractCategory extends ExtendContractCategory
+#[ORM\Table(name: 'dmkclub_sponsor_contractcategory')]
+#[ORM\Entity(repositoryClass: ContractCategoryRepository::class)]
+#[ORM\HasLifecycleCallbacks]
+#[Config(
+    routeName: 'dmkclub_contractcategory_index',
+    routeView: 'dmkclub_contractcategory_view',
+    defaultValues: [
+        'entity' => ['icon' => 'fa-gear'],
+        'ownership' => [
+            'owner_type' => 'USER',
+            'owner_field_name' => 'owner',
+            'owner_column_name' => 'user_owner_id',
+            'organization_field_name' => 'organization',
+            'organization_column_name' => 'organization_id',
+        ],
+        'security' => [
+            'type' => 'ACL',
+            'group_name' => '',
+            'category' => 'dmkclub_data',
+        ],
+        'form' => [
+            'form_type' => ContractCategorySelectType::class,
+            'grid_name' => 'dmkclub-sponsor-contractcategories-select-grid',
+        ],
+        'dataaudit' => ['auditable' => true],
+    ]
+)]
+class ContractCategory implements \Stringable, ExtendEntityInterface
 {
+    use ExtendEntityTrait;
     use LifecycleTrait;
 
-	/*
-	 * Fields have to be duplicated here to enable dataaudit and soap transformation only for contact
-	*/
-	/**
-	 * @var int
-	 *
-	 * @ORM\Id
-	 * @ORM\Column(type="integer", name="id")
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "importexport"={
-	 *              "order"=10
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $id;
+    #[ORM\Id] #[ORM\GeneratedValue]
+    #[ORM\Column(name: 'id', type: Types::INTEGER)]
+    #[ConfigField(defaultValues: ['importexport' => ['order' => 10]])]
+    public int $id;
 
+    #[ORM\Column(name: 'name', type: Types::STRING, length: 255)]
+    #[ConfigField(defaultValues: ['dataaudit' => ['auditable' => true], 'importexport' => ['identity' => true, 'order' => 30]])]
+    public string $name;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="name", type="string", length=255)
-	 * @ConfigField(
-	 *      defaultValues={
-	 *          "dataaudit"={
-	 *              "auditable"=true
-	 *          },
-	 *          "importexport"={
-	 *              "identity"=true,
-	 *              "order"=30
-	 *          }
-	 *      }
-	 * )
-	 */
-	protected $name;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_owner_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    public ?User $owner = null;
 
-	/**
-	 * @var User
-	 * @ORM\ManyToOne(targetEntity="Oro\Bundle\UserBundle\Entity\User")
-	 * @ORM\JoinColumn(name="user_owner_id", referencedColumnName="id", onDelete="SET NULL")
-	 */
-	protected $owner;
+    #[ORM\ManyToOne(targetEntity: Organization::class)]
+    #[ORM\JoinColumn(name: 'organization_id', referencedColumnName: 'id', onDelete: 'SET NULL')]
+    public ?Organization $organization = null;
 
-	/**
-	 * @var Organization
-	 *
-	 * @ORM\ManyToOne(targetEntity="Oro\Bundle\OrganizationBundle\Entity\Organization")
-	 * @ORM\JoinColumn(name="organization_id", referencedColumnName="id", onDelete="SET NULL")
-	 */
-	protected $organization;
-
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function __construct()
-	{
-		parent::__construct();
-
-	}
-
-	/**
-	 * Set id
-	 *
-	 * @param int $id
-	 * @return Category
-	 */
-	public function setId($id)
-	{
-		$this->id = $id;
-
-		return $this;
-	}
-
-	/**
-	 * Get id
-	 *
-	 * @return int
-	 */
-	public function getId()
-	{
-		return $this->id;
-	}
-
-	/**
-	 * Set endDate
-	 *
-	 * @param \DateTime $endDate
-	 * @return Category
-	 */
-	public function setName($id)
-	{
-		$this->name = $id;
-
-		return $this;
-	}
-
-	/**
-	 * Get id
-	 *
-	 * @return int
-	 */
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function __toString()
-	{
-		return (string) $this->getName();
-	}
-
-	/**
-	 * @return User
-	 */
-	public function getOwner()
-	{
-		return $this->owner;
-	}
-
-	/**
-	 * @param User $user
-	 */
-	public function setOwner(User $user)
-	{
-		$this->owner = $user;
-	}
-
-	/**
-	 * Set organization
-	 *
-	 * @param Organization $organization
-	 * @return Category
-	 */
-	public function setOrganization(Organization $organization = null)
-	{
-		$this->organization = $organization;
-
-		return $this;
-	}
-
-	/**
-	 * Get organization
-	 *
-	 * @return Organization
-	 */
-	public function getOrganization()
-	{
-		return $this->organization;
-	}
+    public function __toString()
+    {
+        return $this->name;
+    }
 }

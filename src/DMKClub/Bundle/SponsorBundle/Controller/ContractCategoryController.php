@@ -1,124 +1,84 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\SponsorBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-
-use Oro\Bundle\SecurityBundle\Annotation\Acl;
-use Oro\Bundle\SecurityBundle\Annotation\AclAncestor;
-
 use DMKClub\Bundle\SponsorBundle\Entity\ContractCategory;
-use DMKClub\Bundle\SponsorBundle\Form\Handler\CategoryHandler;
 use DMKClub\Bundle\SponsorBundle\Form\Handler\ContractCategoryHandler;
-use Symfony\Component\Form\Form;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use DMKClub\Bundle\SponsorBundle\Form\Type\ContractCategoryType;
+use EHDev\BasicsBundle\Security\Voter\IsWidgetFlow;
 use Oro\Bundle\FormBundle\Model\UpdateHandlerFacade;
+use Oro\Bundle\SecurityBundle\Attribute\Acl;
+use Oro\Bundle\SecurityBundle\Attribute\AclAncestor;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-
-/**
- * @Route("/sponsor/contractcategory")
- */
-class ContractCategoryController extends AbstractController
+#[Route('/sponsor/contractcategory')]
+readonly class ContractCategoryController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function getSubscribedServices()
-    {
-        return array_merge(parent::getSubscribedServices(), [
-            TranslatorInterface::class,
-            ContractCategoryHandler::class,
-            'dmkclub.sponsor.contractcategory.form' => Form::class,
-            UpdateHandlerFacade::class,
-        ]);
-    }
+    public function __construct(
+        private TranslatorInterface $translator,
+        private UpdateHandlerFacade $handlerFacade,
+        private FormFactoryInterface $formFactory,
+        private ContractCategoryHandler $contractCategoryHandler,
+    ) {}
 
-	/**
-	 * @Route("/", name="dmkclub_sponsor_contractcategory_index")
-	 * @AclAncestor("dmkclub_sponsor_contractcategory_view")
-	 * @Template
-	 */
-	public function indexAction()
-	{
-		return [
-			'entity_class' => ContractCategory::class,
-		];
-	}
-
-	/**
-     * Create contract category form
-     * @Route("/create", name="dmkclub_sponsor_contractcategory_create")
-     * @Template("DMKClubSponsorBundle:ContractCategory:update.html.twig")
-     * @Acl(
-     *      id="dmkclub_sponsor_contractcategory_create",
-     *      type="entity",
-     *      permission="CREATE",
-     *      class="DMKClubSponsorBundle:Category"
-     * )
-     */
-    public function createAction() {
-        return $this->update(new ContractCategory());
-    }
-    /**
-     * Update contractcategory form
-     * @Route("/update/{id}", name="dmkclub_sponsor_contractcategory_update", requirements={"id"="\d+"}, defaults={"id"=0})
-     *
-     * @Template
-     * @Acl(
-     *      id="dmkclub_sponsor_contractcategory_update",
-     *      type="entity",
-     *      permission="EDIT",
-     *      class="DMKClubSponsorBundle:ContractCategory"
-     * )
-     */
-    public function updateAction(ContractCategory $entity)
-    {
-    	return $this->update($entity);
-    }
-    /**
-     * @param ContractCategory $entity
-     *
-     * @return array
-     */
-    protected function update(ContractCategory $entity)
-    {
-        /* @var $handler  \Oro\Bundle\FormBundle\Model\UpdateHandlerFacade */
-        $handler = $this->get(UpdateHandlerFacade::class);
-
-        $data = $handler->update(
-            $entity,
-            $this->get('dmkclub.sponsor.contractcategory.form'),
-            $this->get(TranslatorInterface::class)->trans('dmkclub.controller.contractcategory.saved.message'),
-            null,
-            $this->get(ContractCategoryHandler::class)
-        );
-        return $data;
-    }
-    /**
-     * @Route("/view/{id}", name="dmkclub_sponsor_contractcategory_view", requirements={"id"="\d+"}))
-     * @Acl(
-     *      id="dmkclub_sponsor_contractcategory_view",
-     *      type="entity",
-     *      permission="VIEW",
-     *      class="DMKClubSponsorBundle:ContractCategory"
-     * )
-     * @Template
-     */
-    public function viewAction(ContractCategory $entity) {
-        return ['entity' => $entity];
-    }
-    /**
-     * @Route("/widget/info/{id}", name="dmkclub_sponsor_contractcategory_widget_info", requirements={"id"="\d+"})
-     * @AclAncestor("dmkclub_sponsor_contractcategory_view")
-     * @Template
-     */
-    public function infoAction(ContractCategory $entity)
+    #[Route('/', name: 'dmkclub_sponsor_contractcategory_index')]
+    #[AclAncestor('dmkclub_sponsor_contractcategory_view')]
+    #[Template('@DMKClubSponsor/ContractCategory/index.html.twig')]
+    public function indexAction(): array
     {
         return [
-            'entity' => $entity
+            'entity_class' => ContractCategory::class,
         ];
     }
 
+    #[Route('/create', name: 'dmkclub_sponsor_contractcategory_create')]
+    #[Acl(id: 'dmkclub_sponsor_contractcategory_create', type: 'entity', class: ContractCategory::class, permission: 'CREATE')]
+    #[Template('@DMKClubSponsor/ContractCategory/update.html.twig')]
+    public function createAction(): RedirectResponse|array
+    {
+        return $this->update(new ContractCategory());
+    }
+
+    #[Route('/update/{id}', name: 'dmkclub_sponsor_contractcategory_update', requirements: ['id' => '\d+'])]
+    #[Acl(id: 'dmkclub_sponsor_contractcategory_update', type: 'entity', class: ContractCategory::class, permission: 'EDIT')]
+    #[Template('@DMKClubSponsor/ContractCategory/update.html.twig')]
+    public function updateAction(ContractCategory $entity): RedirectResponse|array
+    {
+        return $this->update($entity);
+    }
+
+    private function update(ContractCategory $entity): RedirectResponse|array
+    {
+        return $this->handlerFacade->update($entity,
+            $this->formFactory->create(ContractCategoryType::class),
+            $this->translator->trans('dmkclub.controller.contractcategory.saved.message'),
+            formHandler: $this->contractCategoryHandler,
+        );
+    }
+
+    #[Route('/view/{id}', name: 'dmkclub_sponsor_contractcategory_view', requirements: ['id' => '\d+'])]
+    #[Acl(id: 'dmkclub_sponsor_contractcategory_view', type: 'entity', class: ContractCategory::class, permission: 'VIEW')]
+    #[Template('@DMKClubSponsor/ContractCategory/view.html.twig')]
+    public function viewAction(ContractCategory $entity): array
+    {
+        return ['entity' => $entity];
+    }
+
+    #[Route('/widget/info/{id}', name: 'dmkclub_sponsor_contractcategory_widget_info', requirements: ['id' => '\d+'])]
+    #[IsGranted(IsWidgetFlow::VOTER)]
+    #[AclAncestor('dmkclub_sponsor_contractcategory_view')]
+    #[Template('@DMKClubSponsor/ContractCategory/widget/info.html.twig')]
+    public function infoAction(ContractCategory $entity): array
+    {
+        return [
+            'entity' => $entity,
+        ];
+    }
 }

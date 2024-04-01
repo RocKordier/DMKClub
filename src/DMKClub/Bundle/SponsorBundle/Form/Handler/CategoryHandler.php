@@ -1,64 +1,44 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\SponsorBundle\Form\Handler;
 
+use DMKClub\Bundle\SponsorBundle\Entity\Category;
+use Doctrine\Persistence\ObjectManager;
+use Oro\Bundle\FormBundle\Form\Handler\FormHandlerInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-use Doctrine\Persistence\ObjectManager;
-use DMKClub\Bundle\SponsorBundle\Entity\Category;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Oro\Bundle\FormBundle\Form\Handler\FormHandlerInterface;
-
-class CategoryHandler implements FormHandlerInterface
+readonly class CategoryHandler implements FormHandlerInterface
 {
-	/** @var ObjectManager */
-	protected $manager;
+    public function __construct(
+        private ObjectManager $manager
+    ) {}
 
-	/**
-	 * @param FormInterface          $form
-	 * @param RequestStack           $request
-	 * @param ObjectManager          $manager
-	 */
-	public function __construct(
-			ObjectManager $manager
-	) {
-		$this->manager                = $manager;
-	}
+    /**
+     * @param Category $data
+     */
+    public function process($data, FormInterface $form, Request $request): bool
+    {
+        $form->setData($data);
 
-	/**
-	 * Process form
-	 *
-	 * @param  Category $entity
-	 *
-	 * @return bool True on successful processing, false otherwise
-	 */
-	public function process($entity, FormInterface $form, Request $request)
-	{
+        if (\in_array($request->getMethod(), ['POST', 'PUT'])) {
+            $form->handleRequest($request);
 
-		$form->setData($entity);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $this->onSuccess($data);
 
-		if (in_array($request->getMethod(), ['POST', 'PUT'])) {
-			$form->handleRequest($request);
+                return true;
+            }
+        }
 
-			if ($form->isValid()) {
-				$this->onSuccess($entity);
+        return false;
+    }
 
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * "Success" form handler
-	 *
-	 * @param Category $entity
-	 */
-	protected function onSuccess(Category $entity)
-	{
-		$this->manager->persist($entity);
-		$this->manager->flush();
-	}
+    private function onSuccess(Category $entity): void
+    {
+        $this->manager->persist($entity);
+        $this->manager->flush();
+    }
 }

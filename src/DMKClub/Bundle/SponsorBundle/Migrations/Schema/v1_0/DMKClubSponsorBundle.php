@@ -1,30 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\SponsorBundle\Migrations\Schema\v1_0;
 
 use Doctrine\DBAL\Schema\Schema;
-
 use Oro\Bundle\MigrationBundle\Migration\Migration;
 use Oro\Bundle\MigrationBundle\Migration\QueryBag;
 
 class DMKClubSponsorBundle implements Migration
 {
-    /**
-     * @inheritdoc
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     */
-    public function up(Schema $schema, QueryBag $queries) {
+    public function up(Schema $schema, QueryBag $queries): void
+    {
         $this->createDmkclubSponsorTable($schema);
         $this->createDmkclubSponsorcategoryTable($schema);
 
         $this->addDmkclubSponsorForeignKeys($schema);
     }
-    /**
-     * Create dmkclub_sponsor table
-     *
-     * @param Schema $schema
-     */
-    protected function createDmkclubSponsorTable(Schema $schema)
+
+    private function createDmkclubSponsorTable(Schema $schema): void
     {
         $table = $schema->createTable('dmkclub_sponsor');
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
@@ -49,27 +43,7 @@ class DMKClubSponsorBundle implements Migration
         $table->addIndex(['data_channel_id'], 'IDX_3A9D13D1BDC09B73', []);
     }
 
-    /**
-     * Create dmkclub_sponsor_to_category table
-     *
-     * @param Schema $schema
-     */
-    protected function createDmkclubSponsorToCategoryTable(Schema $schema)
-    {
-        $table = $schema->createTable('dmkclub_sponsor_to_category');
-        $table->addColumn('sponsor_id', 'integer', []);
-        $table->addColumn('sponsor_category_id', 'integer', []);
-        $table->setPrimaryKey(['sponsor_id', 'sponsor_category_id']);
-        $table->addIndex(['sponsor_id'], 'IDX_EAEFA7CD12F7FB51', []);
-        $table->addIndex(['sponsor_category_id'], 'IDX_EAEFA7CD44B2CEF9', []);
-    }
-
-    /**
-     * Create dmkclub_sponsorcategory table
-     *
-     * @param Schema $schema
-     */
-    protected function createDmkclubSponsorcategoryTable(Schema $schema)
+    private function createDmkclubSponsorcategoryTable(Schema $schema): void
     {
         $table = $schema->createTable('dmkclub_sponsorcategory');
         $table->addColumn('id', 'integer', ['autoincrement' => true]);
@@ -79,14 +53,7 @@ class DMKClubSponsorBundle implements Migration
         $table->setPrimaryKey(['id']);
     }
 
-
-
-    /**
-     * Add dmkclub_sponsor foreign keys.
-     *
-     * @param Schema $schema
-     */
-    protected function addDmkclubSponsorForeignKeys(Schema $schema)
+    private function addDmkclubSponsorForeignKeys(Schema $schema): void
     {
         $table = $schema->getTable('dmkclub_sponsor');
         $table->addForeignKeyConstraint(
@@ -126,5 +93,4 @@ class DMKClubSponsorBundle implements Migration
             ['onDelete' => 'SET NULL', 'onUpdate' => null]
         );
     }
-
 }

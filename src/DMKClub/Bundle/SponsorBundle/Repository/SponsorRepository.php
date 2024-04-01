@@ -1,5 +1,8 @@
 <?php
-namespace DMKClub\Bundle\SponsorBundle\Entity\Repository;
+
+declare(strict_types=1);
+
+namespace DMKClub\Bundle\SponsorBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 

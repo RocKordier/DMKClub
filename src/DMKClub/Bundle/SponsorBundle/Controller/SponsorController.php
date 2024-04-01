@@ -1,124 +1,86 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\SponsorBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-
-use Oro\Bundle\SecurityBundle\Annotation\Acl;
-use Oro\Bundle\SecurityBundle\Annotation\AclAncestor;
+use DMKClub\Bundle\SponsorBundle\Entity\Sponsor;
+use DMKClub\Bundle\SponsorBundle\Form\Handler\SponsorHandler;
+use DMKClub\Bundle\SponsorBundle\Form\Type\SponsorType;
+use EHDev\BasicsBundle\Security\Voter\IsWidgetFlow;
 use Oro\Bundle\AccountBundle\Entity\Account;
 use Oro\Bundle\ChannelBundle\Entity\Channel;
-
-use DMKClub\Bundle\SponsorBundle\Entity\Sponsor;
+use Oro\Bundle\EntityBundle\ORM\DoctrineHelper;
+use Oro\Bundle\FormBundle\Model\UpdateHandlerFacade;
+use Oro\Bundle\SecurityBundle\Attribute\Acl;
+use Oro\Bundle\SecurityBundle\Attribute\AclAncestor;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use DMKClub\Bundle\SponsorBundle\Form\Handler\SponsorHandler;
-use Symfony\Component\Form\Form;
-use Oro\Bundle\FormBundle\Model\UpdateHandler;
 
-
-/**
- * @Route("/sponsor")
- */
-class SponsorController extends AbstractController
+#[Route('/sponsor')]
+readonly class SponsorController
 {
-    /**
-     * {@inheritdoc}
-     */
-    public static function getSubscribedServices()
+    public function __construct(
+        private TranslatorInterface $translator,
+        private UpdateHandlerFacade $handlerFacade,
+        private FormFactoryInterface $formFactory,
+        private SponsorHandler $sponsorHandler,
+        private DoctrineHelper $doctrineHelper,
+    ) {}
+
+    #[Route('/', name: 'dmkclub_sponsor_index')]
+    #[AclAncestor('dmkclub_sponsor_view')]
+    #[Template('@DMKClubSponsor/Sponsor/index.html.twig')]
+    public function indexAction(): array
     {
-        return array_merge(parent::getSubscribedServices(), [
-            TranslatorInterface::class,
-            SponsorHandler::class,
-            'dmkclub.sponsor.form' => Form::class,
-            UpdateHandler::class,
-        ]);
+        return ['entity_class' => Sponsor::class];
     }
 
-	/**
-	 * @Route("/", name="dmkclub_sponsor_index")
-	 * @AclAncestor("dmkclub_sponsor_view")
-	 * @Template
-	 */
-	public function indexAction()
-	{
-		return [
-			'entity_class' => Sponsor::class,
-		];
-	}
-    /**
-     * Create sponsor form
-     * @Route("/create", name="dmkclub_sponsor_create")
-     * @Template("DMKClubSponsorBundle:Sponsor:update.html.twig")
-     * @Acl(
-     *      id="dmkclub_sponsor_create",
-     *      type="entity",
-     *      permission="CREATE",
-     *      class="DMKClubSponsorBundle:Sponsor"
-     * )
-     */
-    public function createAction() {
-    	return $this->update(new Sponsor());
-    }
-    /**
-     * Update sponsor form
-     * @Route("/update/{id}", name="dmkclub_sponsor_update", requirements={"id"="\d+"}, defaults={"id"=0})
-     *
-     * @Template
-     * @Acl(
-     *      id="dmkclub_sponsor_update",
-     *      type="entity",
-     *      permission="EDIT",
-     *      class="DMKClubSponsorBundle:Sponsor"
-     * )
-     */
-    public function updateAction(Sponsor $entity)
+    #[Route('/create', name: 'dmkclub_sponsor_create')]
+    #[Acl(id: 'dmkclub_sponsor_create', type: 'entity', class: Sponsor::class, permission: 'CREATE')]
+    #[Template('@DMKClubSponsor/Sponsor/update.html.twig')]
+    public function createAction(): RedirectResponse|array
     {
-    	return $this->update($entity);
+        return $this->update(new Sponsor());
     }
-    /**
-     * @param Sponsor $entity
-     *
-     * @return array
-     */
-    protected function update(Sponsor $entity)
+
+    #[Route('/update/{id}', name: 'dmkclub_sponsor_update', requirements: ['id' => '\d+'])]
+    #[Acl(id: 'dmkclub_sponsor_update', type: 'entity', class: Sponsor::class, permission: 'EDIT')]
+    #[Template('@DMKClubSponsor/Sponsor/update.html.twig')]
+    public function updateAction(Sponsor $entity): RedirectResponse|array
     {
-        return $this->get(UpdateHandler::class)->update(
-            $entity,
-            $this->get('dmkclub.sponsor.form'),
-            $this->get(TranslatorInterface::class)->trans('dmkclub.controller.sponsor.saved.message'),
-    	    null,
-            $this->get(SponsorHandler::class)
+        return $this->update($entity);
+    }
+
+    private function update(Sponsor $entity): RedirectResponse|array
+    {
+        return $this->handlerFacade->update($entity,
+            $this->formFactory->create(SponsorType::class),
+            $this->translator->trans('dmkclub.controller.sponsor.saved.message'),
+            formHandler: $this->sponsorHandler,
         );
     }
 
-    /**
-     * @Route("/view/{id}", name="dmkclub_sponsor_view", requirements={"id"="\d+"}))
-     * @Acl(
-     *      id="dmkclub_sponsor_view",
-     *      type="entity",
-     *      permission="VIEW",
-     *      class="DMKClubSponsorBundle:Sponsor"
-     * )
-     * @Template
-     */
-    public function viewAction(Sponsor $entity)
+    #[Route('/view/{id}', name: 'dmkclub_sponsor_view', requirements: ['id' => '\d+'])]
+    #[Acl(id: 'dmkclub_sponsor_view', type: 'entity', class: Sponsor::class, permission: 'VIEW')]
+    #[Template('@DMKClubSponsor/Sponsor/view.html.twig')]
+    public function viewAction(Sponsor $entity): array
     {
         return ['entity' => $entity];
     }
 
-    /**
-     * @Route("/widget/info/{id}", name="dmkclub_sponsor_widget_info", requirements={"id"="\d+"})
-     * @AclAncestor("dmkclub_sponsor_view")
-     * @Template
-     */
-    public function infoAction(Sponsor $entity)
+    #[Route('/widget/info/{id}', name: 'dmkclub_sponsor_widget_info', requirements: ['id' => '\d+'])]
+    #[IsGranted(IsWidgetFlow::VOTER)]
+    #[AclAncestor('dmkclub_sponsor_view')]
+    #[Template('@DMKClubSponsor/Sponsor/widget/info.html.twig')]
+    public function infoAction(Sponsor $entity): array
     {
-        return [
-            'entity' => $entity
-        ];
+        return ['entity' => $entity];
     }
 
     /**
@@ -129,42 +91,43 @@ class SponsorController extends AbstractController
      * Die eigentlichen Datensätze werden dann in der Route
      * dmkclub_sponsor_widget_sponsor_info gerendert.
      *
-     * @Route(
-     *      "/widget/sponsor-info/account/{accountId}/channel/{channelId}",
-     *      name="dmkclub_sponsor_widget_account_sponsor_info",
-     *      requirements={"accountId"="\d+", "channelId"="\d+"}
-     * )
+     * @TODO
+     *
      * @ParamConverter("account", class="OroAccountBundle:Account", options={"id" = "accountId"})
      * @ParamConverter("channel", class="OroChannelBundle:Channel", options={"id" = "channelId"})
-     * @AclAncestor("orocrm_sales_b2bcustomer_view")
-     * @Template
      */
-    public function accountSponsorInfoAction(Account $account, Channel $channel)
+    #[Route('/widget/sponsor-info/account/{accountId}/channel/{channelId}',
+        name: 'dmkclub_sponsor_widget_account_sponsor_info',
+        requirements: ['accountId' => '\d+', 'channelId' => '\d+'])
+    ]
+    #[IsGranted(IsWidgetFlow::VOTER)]
+    #[AclAncestor('orocrm_sales_b2bcustomer_view')]
+    #[Template('@DMKClubSponsor/Sponsor/widget/sponsorInfo.html.twig')]
+    public function accountSponsorInfoAction(Account $account, Channel $channel): array
     {
-        $entities = $this->getDoctrine()
-            ->getRepository('DMKClubSponsorBundle:Sponsor')
+        $entities = $this->doctrineHelper->getEntityRepositoryForClass(Sponsor::class)
             ->findBy(['account' => $account, 'dataChannel' => $channel]);
 
         return ['account' => $account, 'sponsors' => $entities, 'channel' => $channel];
     }
 
     /**
-     * @Route(
-     *        "/widget/sponsor-info/{id}/channel/{channelId}",
-     *        name="dmkclub_sponsor_widget_sponsor_info",
-     *        requirements={"id"="\d+", "channelId"="\d+"}
-     * )
+     * @TODO
+     *
      * @ParamConverter("channel", class="OroChannelBundle:Channel", options={"id" = "channelId"})
-     * @AclAncestor("orocrm_magento_customer_view")
-     * @Template
      */
-    public function sponsorInfoAction(Sponsor $entity, Channel $channel)
+    #[Route('/widget/sponsor-info/{id}/channel/{channelId}',
+        name: 'dmkclub_sponsor_widget_sponsor_info',
+        requirements: ['id' => '\d+', 'channelId' => '\d+']
+    )]
+    #[IsGranted(IsWidgetFlow::VOTER)]
+    #[AclAncestor('orocrm_magento_customer_view')]
+    #[Template('@DMKClubSponsor/Sponsor/widget/sponsorInfo.html.twig')]
+    public function sponsorInfoAction(Sponsor $entity, Channel $channel): array
     {
         return [
-            'sponsor'             => $entity,
-            'channel'              => $channel,
-//             'leadClassName'        => $this->container->getParameter('orocrm_sales.lead.entity.class'),
-//             'opportunityClassName' => $this->container->getParameter('orocrm_sales.opportunity.class'),
+            'sponsor' => $entity,
+            'channel' => $channel,
         ];
     }
 }

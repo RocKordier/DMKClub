@@ -1,75 +1,47 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DMKClub\Bundle\SponsorBundle\Form\Handler;
 
-use Symfony\Component\Form\FormInterface;
-
-use Doctrine\Persistence\ObjectManager;
 use DMKClub\Bundle\SponsorBundle\Entity\Sponsor;
-use Oro\Bundle\TagBundle\Entity\TagManager;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Doctrine\Persistence\ObjectManager;
 use Oro\Bundle\FormBundle\Form\Handler\FormHandlerInterface;
+use Oro\Bundle\TagBundle\Entity\TagManager;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class SponsorHandler implements FormHandlerInterface
+readonly class SponsorHandler implements FormHandlerInterface
 {
-	/** @var ObjectManager */
-	protected $manager;
+    public function __construct(
+        private ObjectManager $manager,
+        private TagManager $tagManager,
+    ) {}
 
-	/**
-	 * @param FormInterface          $form
-	 * @param RequestStack           $request
-	 * @param ObjectManager          $manager
-	 */
-	public function __construct(
-			ObjectManager $manager
-	) {
-		$this->manager                = $manager;
-	}
+    /**
+     * @param Sponsor $data
+     */
+    public function process($data, FormInterface $form, Request $request): bool
+    {
+        $form->setData($data);
 
-	/**
-	 * Process form
-	 *
-	 * @param  Sponsor $entity
-	 *
-	 * @return bool True on successful processing, false otherwise
-	 */
-	public function process($entity, FormInterface $form, Request $request)
-	{
+        if (\in_array($request->getMethod(), ['POST', 'PUT'])) {
+            $form->handleRequest($request);
 
-		$form->setData($entity);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $this->onSuccess($data);
 
-		if (in_array($request->getMethod(), ['POST', 'PUT'])) {
-			$form->handleRequest($request);
+                return true;
+            }
+        }
 
-			if ($form->isValid()) {
-				$this->onSuccess($entity);
+        return false;
+    }
 
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * "Success" form handler
-	 *
-	 * @param Sponsor $entity
-	 */
-	protected function onSuccess(Sponsor $entity)
-	{
-		$this->manager->persist($entity);
-		$this->manager->flush();
-		$this->tagManager->saveTagging($entity);
-	}
-	/**
-	 * Setter for tag manager
-	 *
-	 * @param TagManager $tagManager
-	 */
-	public function setTagManager(TagManager $tagManager)
-	{
-		$this->tagManager = $tagManager;
-	}
+    private function onSuccess(Sponsor $entity): void
+    {
+        $this->manager->persist($entity);
+        $this->manager->flush();
+        $this->tagManager->saveTagging($entity);
+    }
 }
